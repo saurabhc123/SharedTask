@@ -120,7 +120,7 @@ def right_category_linked(index,ptree):
 	return label
 
 
-def gen_features(input_file_path):
+def gen_features(input_file_path, connectivelist):
 	allDevData=[]
 	identifierdev=[]
 	parsefiles=readInput(input_file_path)
@@ -128,7 +128,7 @@ def gen_features(input_file_path):
 	c_id=''
 	pc_id=''
 	file_count=0
-	filename=open("connectivelist","r")
+	filename=open(connectivelist,"r")
 	encoded=filename.read()
 	connectivelist=json.loads(encoded)
 	filename.close()
@@ -310,34 +310,15 @@ def gen_features(input_file_path):
 #===================================================================================================================================
 
 
-def main():
-
-	parser = argparse.ArgumentParser(
-	description="Run a pre-trained connective classifier detection module")
-	parser.add_argument('parsefile', help='Path to parses.json')
-	parser.add_argument('modelfile', help='Path to pretrained classifier model file')
-	parser.add_argument('connectivelist', help='Path to connectivelist')
-	parser.add_argument('outputfolder', help='Folder for saving output files: relations_from_connective_output.json and scorer-format output file')
-	args = parser.parse_args()
-	
-	if len(sys.argv)<3:
-		print "Please Specify Proper Arguments:"
-		print "parsefile : default parses.json"
-		print "modelfile : default savedClassifier0414maxentGIStraintestconnonly.json"
-		print "connectivelist : default connectivelist"
-		print "outputfolder : default . (current folder)"
-		print "Thus, the default command to run would be:"
-		print "    python evaluate_connective_classifier_maxent.py parses.json savedClassifier0414maxentGIStraintestconnonly.json ."
-		sys.exit(1)
-			
+def main(parsefile, modelfile, connectivelist, outputfolder):		
 	
 	print "Loading Pre-trained Model..."
 	print " "
-	with open(args.modelfile, "r") as filename:
+	with open(modelfile, "r") as filename:
 		classifiers=pkl.load(filename)
 
 	print "Loading Data and generating features..."
-	allDevData,identifierdev=gen_features(args.parsefile)
+	allDevData,identifierdev=gen_features(parsefile, connectivelist)
 
 	test=[]
 	testind=[]
@@ -391,13 +372,13 @@ def main():
 	
 	print "    Writing Scorer-Format Output File to scorerfileconnectiveoutput.json..." 
 	import json
-	filename=open(args.outputfolder+"scorerfileconnectiveoutput.json","w")
+	filename=open(outputfolder+"/scorerfileconnectiveoutput.json","w")
 	for line in scorerfile:
 		print>>filename, json.dumps(line)
 	filename.close()
 
 	print "    Writing Relations File to relations_from_connective_output.json..."
-	filename=open(args.outputfolder+"relations_from_connective_output.json","w")
+	filename=open(outputfolder+"/relations_from_connective_output.json","w")
 	for line in relationsfile:
 		print>>filename, json.dumps(line)
 	filename.close()
@@ -408,7 +389,26 @@ def main():
 
 
 if __name__=='__main__':
-	main()
+	
+	parser = argparse.ArgumentParser(
+	description="Run a pre-trained connective classifier detection module")
+	parser.add_argument('parsefile', help='Path to parses.json')
+	parser.add_argument('modelfile', help='Path to pretrained classifier model file')
+	parser.add_argument('connectivelist', help='Path to connectivelist')
+	parser.add_argument('outputfolder', help='Folder for saving output files: relations_from_connective_output.json and scorer-format output file')
+	args = parser.parse_args()
+	
+	if len(sys.argv)<3:
+		print "Please Specify Proper Arguments:"
+		print "parsefile : default parses.json"
+		print "modelfile : default savedClassifier0414maxentGIStraintestconnonly.json"
+		print "connectivelist : default connectivelist"
+		print "outputfolder : default . (current folder)"
+		print "Thus, the default command to run would be:"
+		print "    python evaluate_connective_classifier_maxent.py parses.json savedClassifier0414maxentGIStraintestconnonly.json connectivelist ."
+		sys.exit(1)
+
+	main(args.parsefile, args.modelfile, args.connectivelist, args.outputfolder)
 
 
 
