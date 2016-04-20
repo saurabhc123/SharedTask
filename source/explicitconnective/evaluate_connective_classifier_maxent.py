@@ -4,6 +4,8 @@ from nltk.tree import *
 import codecs
 import json
 import pickle as pkl
+import argparse
+import sys
 
 #================================  DEFINE ALL FUNCTIONS ====================================================================
 
@@ -11,7 +13,7 @@ def readInput(inputFilenamePath):
 	
 	#Read parses.json
 	print ("    Reading parses.json");
-	parse_file = codecs.open(inputFilenamePath+'/parses.json', encoding='utf8')
+	parse_file = codecs.open(inputFilenamePath, encoding='utf8')
 	en_parse_dict = json.load(parse_file)
 	print ("    Done");
 	return en_parse_dict
@@ -118,10 +120,10 @@ def right_category_linked(index,ptree):
 	return label
 
 
-def gen_features():
+def gen_features(input_file_path):
 	allDevData=[]
 	identifierdev=[]
-	parsefiles=readInput('.')
+	parsefiles=readInput(input_file_path)
 	nc_id=''
 	c_id=''
 	pc_id=''
@@ -308,14 +310,34 @@ def gen_features():
 #===================================================================================================================================
 
 
-if __name__=='__main__':
+def main():
+
+	parser = argparse.ArgumentParser(
+	description="Run a pre-trained connective classifier detection module")
+	parser.add_argument('parsefile', help='Path to parses.json')
+	parser.add_argument('modelfile', help='Path to pretrained classifier model file')
+	parser.add_argument('connectivelist', help='Path to connectivelist')
+	parser.add_argument('outputfolder', help='Folder for saving output files: relations_from_connective_output.json and scorer-format output file')
+	args = parser.parse_args()
+	
+	if len(sys.argv)<3:
+		print "Please Specify Proper Arguments:"
+		print "parsefile : default parses.json"
+		print "modelfile : default savedClassifier0414maxentGIStraintestconnonly.json"
+		print "connectivelist : default connectivelist"
+		print "outputfolder : default . (current folder)"
+		print "Thus, the default command to run would be:"
+		print "    python evaluate_connective_classifier_maxent.py parses.json savedClassifier0414maxentGIStraintestconnonly.json ."
+		sys.exit(1)
+			
+	
 	print "Loading Pre-trained Model..."
 	print " "
-	with open("savedClassifier0414maxentGIStraintestconnonly.json", "r") as filename:
+	with open(args.modelfile, "r") as filename:
 		classifiers=pkl.load(filename)
 
 	print "Loading Data and generating features..."
-	allDevData,identifierdev=gen_features()
+	allDevData,identifierdev=gen_features(args.parsefile)
 
 	test=[]
 	testind=[]
@@ -369,17 +391,24 @@ if __name__=='__main__':
 	
 	print "    Writing Scorer-Format Output File to scorerfileconnectiveoutput.json..." 
 	import json
-	filename=open("scorerfileconnectiveoutput.json","w")
+	filename=open(args.outputfolder+"scorerfileconnectiveoutput.json","w")
 	for line in scorerfile:
 		print>>filename, json.dumps(line)
 	filename.close()
 
 	print "    Writing Relations File to relations_from_connective_output.json..."
-	filename=open("relations_from_connective_output.json","w")
+	filename=open(args.outputfolder+"relations_from_connective_output.json","w")
 	for line in relationsfile:
 		print>>filename, json.dumps(line)
 	filename.close()
 
 	print " "
 	print "All Executions Successfull..."
-	
+
+
+
+if __name__=='__main__':
+	main()
+
+
+
