@@ -1,7 +1,7 @@
 
 import json
 import sys
-from explicitconnective import evaluate_connective_classifier_maxent
+import explicitconnective.evaluate_connective_classifier_maxent
 
 class DiscourseParser(object):
 
@@ -10,8 +10,8 @@ class DiscourseParser(object):
 
 
     def run_connective_classifier(self, input_path, model_path, output_path):
-            explicit_connective_classifier = evaluate_connective_classifier_maxent.ExplicitConnectiveClassifier();
-            explicit_connective_classifier.main(input_path, model_path, 'connectivelist', output_path)
+        explicitconnective.evaluate_connective_classifier_maxent.main(input_path, model_path, "connectivelist",  output_path)
+
     def parse_doc(self, doc, doc_id):
         output = []
         num_sentences = len(doc['sentences'])

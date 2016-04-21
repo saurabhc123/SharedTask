@@ -8,13 +8,10 @@ import nltk
 from nltk.tree import *
 
 
-class ExplicitConnectiveClassifier:
-    # ================================  DEFINE ALL FUNCTIONS ====================================================================
-    def __init__(self):
-        pass
 
 
-    def readInput(self, inputFilenamePath):
+
+def readInput( inputFilenamePath):
 
         # Read parses.json
         print ("    Reading parses.json");
@@ -23,7 +20,7 @@ class ExplicitConnectiveClassifier:
         print ("    Done");
         return en_parse_dict
 
-    def self_category(self, index, ptree):
+def self_category(index, ptree):
         leaf = ptree
         path = ptree.leaf_treeposition(index)
         for ind in path[0:(len(path) - 1)]:
@@ -33,7 +30,7 @@ class ExplicitConnectiveClassifier:
 
         return label
 
-    def parent_category(self, index, ptree):
+def parent_category(index, ptree):
         leaf = ptree
         path = ptree.leaf_treeposition(index)
         for ind in path[0:(len(path) - 1)]:
@@ -43,7 +40,7 @@ class ExplicitConnectiveClassifier:
 
         return label
 
-    def right_sibling(self, index, ptree):
+def right_sibling(index, ptree):
         leaf = ptree
         path = ptree.leaf_treeposition(index)
         for ind in path[0:(len(path) - 1)]:
@@ -53,7 +50,7 @@ class ExplicitConnectiveClassifier:
 
         return label
 
-    def left_sibling(self, index, ptree):
+def left_sibling(index, ptree):
         leaf = ptree
         path = ptree.leaf_treeposition(index)
         for ind in path[0:(len(path) - 1)]:
@@ -63,7 +60,7 @@ class ExplicitConnectiveClassifier:
 
         return label
 
-    def right_sibling_n(self, index, ptree):
+def right_sibling_n(index, ptree):
         leaf = ptree
         path = ptree.leaf_treeposition(index)
         for ind in path[0:(len(path) - 1)]:
@@ -73,7 +70,7 @@ class ExplicitConnectiveClassifier:
 
         return label
 
-    def left_sibling_n(self, index, ptree):
+def left_sibling_n(index, ptree):
         leaf = ptree
         path = ptree.leaf_treeposition(index)
         for ind in path[0:(len(path) - 1)]:
@@ -83,7 +80,7 @@ class ExplicitConnectiveClassifier:
 
         return label
 
-    def current_to_root(self, index, ptree):
+def current_to_root(index, ptree):
         leaf = ptree
         path = ptree.leaf_treeposition(index)
         for ind in path[0:(len(path) - 1)]:
@@ -95,7 +92,7 @@ class ExplicitConnectiveClassifier:
 
         return label
 
-    def parent_category_linked(self, index, ptree):
+def parent_category_linked(index, ptree):
         leaf = ptree
         path = ptree.leaf_treeposition(index)
         for ind in path[0:(len(path) - 1)]:
@@ -109,7 +106,7 @@ class ExplicitConnectiveClassifier:
 
         return label
 
-    def right_category_linked(self, index, ptree):
+def right_category_linked(index, ptree):
         leaf = ptree
         path = ptree.leaf_treeposition(index)
         for ind in path[0:(len(path) - 1)]:
@@ -124,10 +121,10 @@ class ExplicitConnectiveClassifier:
         return label
 
 
-    def gen_features(self , input_file_path, connectivefile):
+def gen_features(input_file_path, connectivefile):
         allDevData = []
         identifierdev = []
-        parsefiles = self.readInput(input_file_path)
+        parsefiles = readInput(input_file_path)
         nc_id = ''
         c_id = ''
         pc_id = ''
@@ -188,15 +185,15 @@ class ExplicitConnectiveClassifier:
                                     p_multi_ind_th = 0
 
                                 if lpind == 0:
-                                    crp = self.current_to_root((counter - 2), ptree)
-                                    self_cat = self.self_category((counter - 2), ptree)
-                                    parent_cat = self.parent_category((counter - 2), ptree)
-                                    left_sib = self.left_sibling((counter - 2), ptree)
-                                    right_sib = self.right_sibling((counter - 2), ptree)
-                                    parent_cat_link = self.parent_category_linked((counter - 2), ptree)
-                                    right_cat_link = self.parent_category_linked((counter - 2), ptree)
-                                    left_sib_n = self.left_sibling_n((counter - 2), ptree)
-                                    right_sib_n = self.right_sibling_n((counter - 2), ptree)
+                                    crp = current_to_root((counter - 2), ptree)
+                                    self_cat = self_category((counter - 2), ptree)
+                                    parent_cat = parent_category((counter - 2), ptree)
+                                    left_sib = left_sibling((counter - 2), ptree)
+                                    right_sib = right_sibling((counter - 2), ptree)
+                                    parent_cat_link = parent_category_linked((counter - 2), ptree)
+                                    right_cat_link = parent_category_linked((counter - 2), ptree)
+                                    left_sib_n = left_sibling_n((counter - 2), ptree)
+                                    right_sib_n = right_sibling_n((counter - 2), ptree)
                                 else:
                                     crp = '0'
                                     self_cat = '0'
@@ -241,16 +238,16 @@ class ExplicitConnectiveClassifier:
                         labels = 'dummy'
 
                         if lpind == 0:
-                            crp = self.current_to_root((counter - 1), ptree)
-                            self_cat = self.self_category((counter - 1), ptree)
-                            parent_cat = self.parent_category((counter - 1), ptree)
-                            left_sib = self.left_sibling((counter - 1), ptree)
-                            right_sib = self.right_sibling((counter - 1), ptree)
-                            parent_cat_link = self.parent_category_linked((counter - 1), ptree)
-                            right_cat_link = self.parent_category_linked((counter - 1), ptree)
+                            crp = current_to_root((counter - 1), ptree)
+                            self_cat = self_category((counter - 1), ptree)
+                            parent_cat = parent_category((counter - 1), ptree)
+                            left_sib = left_sibling((counter - 1), ptree)
+                            right_sib = right_sibling((counter - 1), ptree)
+                            parent_cat_link = parent_category_linked((counter - 1), ptree)
+                            right_cat_link = parent_category_linked((counter - 1), ptree)
 
-                            left_sib_n = self.left_sibling_n((counter - 1), ptree)
-                            right_sib_n = self.right_sibling_n((counter - 1), ptree)
+                            left_sib_n = left_sibling_n((counter - 1), ptree)
+                            right_sib_n = right_sibling_n((counter - 1), ptree)
 
                         else:
                             crp = 0
@@ -321,16 +318,16 @@ class ExplicitConnectiveClassifier:
                 if next[0] in connectivelist:
 
                     if lpind == 0:
-                        crp = self.current_to_root((counter), ptree)
-                        self_cat = self.self_category((counter), ptree)
-                        parent_cat = self.parent_category((counter), ptree)
-                        left_sib = self.left_sibling((counter), ptree)
-                        right_sib = self.right_sibling((counter), ptree)
-                        parent_cat_link = self.parent_category_linked((counter), ptree)
-                        right_cat_link = self.parent_category_linked((counter), ptree)
+                        crp = current_to_root((counter), ptree)
+                        self_cat = self_category((counter), ptree)
+                        parent_cat = parent_category((counter), ptree)
+                        left_sib = left_sibling((counter), ptree)
+                        right_sib = right_sibling((counter), ptree)
+                        parent_cat_link = parent_category_linked((counter), ptree)
+                        right_cat_link = parent_category_linked((counter), ptree)
 
-                        left_sib_n = self.left_sibling_n((counter), ptree)
-                        right_sib_n = self.right_sibling_n((counter), ptree)
+                        left_sib_n = left_sibling_n((counter), ptree)
+                        right_sib_n = right_sibling_n((counter), ptree)
                     else:
                         crp = '0'
                         self_cat = '0'
@@ -362,7 +359,7 @@ class ExplicitConnectiveClassifier:
 
 # ===================================================================================================================================
 
-    def main(self, input_path, model_path, connective_file_name, outputpath):
+def main(input_path, model_path, connective_file_name, outputpath):
         parsefile = input_path + "/parses.json"
         modelfile = model_path + "/explicitconnective/savedClassifier0414maxentGIStraintestconnonly.json"
         connective_file = model_path + "/explicitconnective/" + connective_file_name
@@ -373,8 +370,7 @@ class ExplicitConnectiveClassifier:
             classifiers = pkl.load(filename)
 
         print "Loading Data and generating features..."
-        explicitConnectiveInstance = ExplicitConnectiveClassifier()
-        allDevData, identifierdev = explicitConnectiveInstance.gen_features(parsefile, connective_file)
+        allDevData, identifierdev = gen_features(parsefile, connective_file)
 
         test = []
         testind = []
