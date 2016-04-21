@@ -362,7 +362,7 @@ class ExplicitConnectiveClassifier:
 
 # ===================================================================================================================================
 
-    def main(self, input_path, model_path, connective_file_name, outputfolder):
+    def main(self, input_path, model_path, connective_file_name, outputpath):
         parsefile = input_path + "/parses.json"
         modelfile = model_path + "/explicitconnective/savedClassifier0414maxentGIStraintestconnonly.json"
         connective_file = model_path + "/explicitconnective/" + connective_file_name
@@ -432,6 +432,7 @@ class ExplicitConnectiveClassifier:
 
         print "    Writing Scorer-Format Output File to scorerfileconnectiveoutput.json..."
         import json
+        outputfolder = outputpath + "/explicitconnective"
         filename = open(outputfolder + "/scorerfileconnectiveoutput.json", "w")
         for line in scorerfile:
             print>> filename, json.dumps(line)
