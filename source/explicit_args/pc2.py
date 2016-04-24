@@ -1284,6 +1284,56 @@ def printToFile(relFile, outFile, temp, parse_dict, ps_array):
    json.dump(dictEntry, p)
    p.write("\n");
 
+
+
+def main(parsefile, input_relations_file, output_relations_file):
+
+ testRelationFilePath = input_relations_file;
+ testParseFilePath = parsefile;
+ updatedRelationsFile = output_relations_file;
+
+ start_time = time.time();
+
+
+ readInput('/home/development/data/conll16st-en-01-12-16-train','','train');
+ readInput(testRelationFilePath, testParseFilePath, 'test');
+
+ oa = test_maxent(nltk.classify.MaxentClassifier.ALGORITHMS, trainingSet, testSet, 0);
+ print "Size of Observed Array: " + str(len(oa));
+ preprocessing(testParseFilePath);
+ #preprocessing('/home/development/code/connective_explicit/connectiveclassifierfinal/');
+ #preprocessing('/home/development/data/conll16st-en-01-12-16-dev');
+ preprocessing2('/home/development/code/explicit_args/connective-category.txt');
+ #preprocessing('/home/development/code/explicit_args/conll16st/tutorial/conll16st-en-01-12-16-trial');
+ #ssOrPS('/home/development/data/conll16st-en-01-12-16-dev');
+
+ #Training Set: Constituent
+ trConn, trSet, SS_conns_parallel_list, SS_conns_not_parallel_list, parse_dict, ps_array = SS_parallel_not_parallel('/home/development/data/conll16st-en-01-12-16-train', 'train', []);
+
+ tConn, tSet, SS_conns_parallel_list, SS_conns_not_parallel_list, parse_dict, ps_array = SS_parallel_not_parallel(testParseFilePath, 'test', oa);
+ #tConn, tSet, SS_conns_parallel_list, SS_conns_not_parallel_list, parse_dict, ps_array = SS_parallel_not_parallel('/home/development/code/connective_explicit/connectiveclassifierfinal', 'test', oa);
+ print "SS Parallel Size: " + str(len(SS_conns_parallel_list));
+ print "SS Not Parallel Size: " + str(len(SS_conns_not_parallel_list));
+ print "tConn: " + str(len(tConn));
+ print "tSet: " + str(len(tSet));
+ #tConn, tSet, SS_conns_parallel_list, SS_conns_not_parallel_list, parse_dict = SS_parallel_not_parallel('/home/development/code/explicit_args/conll16st/tutorial/conll16st-en-01-12-16-trial', 'test', oa);
+ predictedArray = test_maxent(nltk.classify.MaxentClassifier.ALGORITHMS, trSet, tSet, 1);
+ print "Size of Predicted Array: " + str(len(predictedArray));
+ temp = mergeSS(tConn, predictedArray, SS_conns_not_parallel_list, parse_dict);
+ print "Size of Temp: " + str(len(temp));
+ scorerFile = '/home/development/code/explicit_args/ss_dev_out.json';
+ printToFile(updatedRelationsFile, scorerFile, temp, parse_dict, ps_array);
+ #printToFile('/home/development/code/explicit_args/ss_dev_out.json', temp, parse_dict, ps_array);
+
+ #test_maxent(nltk.classify.MaxentClassifier.ALGORITHMS, trainingSet, testSet);
+ #splitSSandPS('/home/development/code/explicit_args/conll16st/tutorial/conll16st-en-01-12-16-trial');
+ #SS_parallel_not_parallel();
+ #ssOrPS('/home/development/code/explicit_args/conll16st/tutorial/conll16st-en-01-12-16-trial');
+ #assignSSandPS('/home/development/data/conll16st-en-01-12-16-dev');
+ #ssArgumentExt('/home/development/code/explicit_args/conll16st/tutorial/conll16st-en-01-12-16-trial');
+
+ print "Done with Execution Time: " + str((time.time() - start_time));
+
 if __name__ == '__main__':
  parser = argparse.ArgumentParser(description="The explicit sense classifier")
  parser.add_argument('relationsfile', help='Path to relations.json')

@@ -2,6 +2,7 @@
 import json
 import sys
 import explicitconnective.evaluate_connective_classifier_maxent
+import explicit_args.pc2
 import subprocess
 
 class DiscourseParser(object):
@@ -24,6 +25,7 @@ class DiscourseParser(object):
     def run_explicit_args_extractor(self,input_parses_file ,output_path):
         input_relations_file = output_path + self.explicit_connective_output_file_name
         output_relations_file = output_path + self.explicit_args_output_file_name
+        explicit_args.pc2.main(input_relations_file, input_relations_file, output_relations_file)
 
     def run_ps_arg1_extractor(self,input_parses_file, output_path):
         input_relations_file = output_path + self.explicit_args_output_file_name
