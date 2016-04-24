@@ -1,3 +1,3 @@
 Run the parser as:
 
- python vt_parser.py inputfolder modelfolder outputfolder
+ python componentName.py path-of-parses.json-file path-of-input-relations-file path-of-output-relations-file
