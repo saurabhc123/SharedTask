@@ -170,18 +170,21 @@ def makeDictByDocID(parseDict):
    sentenceID+=1
  return dictByDocID
 
-def readInput(inputFilenamePath, trainOrTest):
+def readInput(inputFilenamePath, inputParse, trainOrTest):
  featForConn = dict();
  #Read relations.json
  if trainOrTest == "test":
   #pdtb_file = codecs.open(inputFilenamePath+'/relations_from_connective_output.json', encoding='utf8');
-  pdtb_file = codecs.open(inputFilenamePath+'/ss_relations.json', encoding='utf8');
+  pdtb_file = codecs.open(inputFilenamePath, encoding='utf8');
  else:
   pdtb_file = codecs.open(inputFilenamePath+'/relations.json', encoding='utf8');
  relations = [json.loads(x) for x in pdtb_file];
 
- #Read parses.json
- parse_file = codecs.open(inputFilenamePath+'/parses.json', encoding='utf8')
+ #Read parses.json 
+ if trainOrTest == "test":
+  parse_file = codecs.open(inputParse, encoding='utf8');
+ else:
+  parse_file = codecs.open(inputFilenamePath+'/parses.json', encoding='utf8')
  en_parse_dict = json.load(parse_file)
  #makeDictByDocID(en_parse_dict);
 
@@ -531,7 +534,7 @@ def preprocessing2(inputFilenamePath):
   conn_category[conn] = category
 
 def preprocessing(inputFilenamePath):
- parse_file = codecs.open(inputFilenamePath+'/parses.json', encoding='utf8')
+ parse_file = codecs.open(inputFilenamePath, encoding='utf8')
  en_parse_dict = json.load(parse_file)
  
  for filename, sentenceObject in en_parse_dict.iteritems():
@@ -564,7 +567,10 @@ def preprocessing(inputFilenamePath):
  #print "Dictionary: " + str(allTokenDict); 
 
 def splitSSandPS(inputFilenamePath, trainOrTest, observedArray):
- parse_file = codecs.open(inputFilenamePath+'/parses.json', encoding='utf8');
+ if trainOrTest == "train":
+  parse_file = codecs.open(inputFilenamePath+'/parses.json', encoding='utf8');
+ else:
+  parse_file = codecs.open(inputFilenamePath, encoding='utf8');
  en_parse_dict = json.load(parse_file);
  dictByDocID = makeDictByDocID(en_parse_dict);
 
@@ -833,6 +839,7 @@ def ssOrPS(inputFilenamePath):
       parallel = True;
      else:
       for index, value in enumerate(wordList):
+       print "Relation Dict2: " + str(len(relation_dict));
        if value < connectiveWordNumberArray[0]:
         #if index == 0:
         #print "First Index String: " + str(allTokenDict[value]);
@@ -1166,10 +1173,10 @@ def get_doc_offset(parse_dict, DocID, sent_index, list):
         temp.append(item + offset)
     return temp
 
-def printToFile(outFile, temp, parse_dict, ps_array):
+def printToFile(relFile, outFile, temp, parse_dict, ps_array):
  index = 0;
  
- with open('/home/development/code/explicit_args/arijit_rel.json', 'w') as f:
+ with open(relFile, 'w') as f:
   for data in temp:
    dictEntry = dict();
    relID = index;
@@ -1203,14 +1210,15 @@ def printToFile(outFile, temp, parse_dict, ps_array):
    dictEntry['Arg1Pos'] = 'SS';
    json.dump(dictEntry, f)
    f.write("\n");
-  
+ ''' 
  with open('/home/development/code/explicit_args/conn.txt', 'w') as t:
   for data in temp:
    docID = data[1];
    conn_indices = get_doc_offset(parse_dict, docID, data[2],data[3]);
    t.write(str(conn_indices));
    t.write("\n");
- 
+ '''
+
  with open(outFile, 'w') as f:
   index = 0;
   for data in temp:
@@ -1257,7 +1265,7 @@ def printToFile(outFile, temp, parse_dict, ps_array):
 
  print "Dict Sentence: " + str(dictSentenceToken);
  print "Dict Document: " + str(dictDocumentToken);
- with open('/home/development/code/explicit_args/arijit_rel.json', 'a') as p:
+ with open(relFile, 'a') as p:
   for ps_entry in ps_array:
    dictEntry = dict();
    filename = ps_entry[2];
@@ -1298,16 +1306,27 @@ def printToFile(outFile, temp, parse_dict, ps_array):
    p.write("\n");
 
 if __name__ == '__main__':
+ parser = argparse.ArgumentParser(description="The explicit sense classifier")
+ parser.add_argument('relationsfile', help='Path to relations.json')
+ parser.add_argument('parsesfile', help='Path to parses.json')
+ parser.add_argument('modeldir', help='Path to pre-trained classifier model directory')
+ parser.add_argument('outputdir', help='Directory for saving output files: relations-explicit-sense.json and scorer-format output file')
+ args = parser.parse_args()
+ testRelationFilePath = args.relationsfile;
+ testParseFilePath = args.parsesfile;
+ updatedRelationsFile = args.outputdir;
+
  start_time = time.time();
  #prepRel('/home/development/code/explicit_args/conll16st/tutorial/conll16st-en-01-12-16-trial', '/home/development/code/explicit_args/conll16st/tutorial/conll16st-en-01-12-16-trial/ss_relations.json')
  #prepRel('/home/development/code/explicit_args/conll16st/tutorial/conll16st-en-01-12-16-trial', '/home/development/code/explicit_args/conll16st/tutorial/conll16st-en-01-12-16-trial/ss_relations.json')
  #prepRel('/home/development/code/explicit_args/arijit_rel', '/home/development/code/explicit_args/ss_relations.json') 
  #prepRel('/home/development/data/conll16st-en-01-12-16-dev', '/home/development/code/explicit_args/dev_rel.json')
  
- readInput('/home/development/data/conll16st-en-01-12-16-train', 'train');
+ readInput('/home/development/data/conll16st-en-01-12-16-train','','train');
  #readInput('/home/development/code/explicit_args/conll16st/tutorial/conll16st-en-01-12-16-trial', 'train');
  #print "Training Set: ", trainingSet;
- readInput('/home/development/code/connective_explicit/connectiveclassifierfinal', 'test');
+ readInput(testRelationFilePath, testParseFilePath, 'test');
+ #readInput('/home/development/code/connective_explicit/connectiveclassifierfinal', 'test');
  #readInput('/home/development/data/conll16st-en-01-12-16-dev', 'test');
  #readInput('/home/development/code/explicit_args/conll16st/tutorial/conll16st-en-01-12-16-trial', 'test');
  #print "Test Set: ", testSet; 
@@ -1315,7 +1334,8 @@ if __name__ == '__main__':
 
  oa = test_maxent(nltk.classify.MaxentClassifier.ALGORITHMS, trainingSet, testSet, 0); 
  print "Size of Observed Array: " + str(len(oa));
- preprocessing('/home/development/code/connective_explicit/connectiveclassifierfinal/');
+ preprocessing(testParseFilePath);
+ #preprocessing('/home/development/code/connective_explicit/connectiveclassifierfinal/');
  #preprocessing('/home/development/data/conll16st-en-01-12-16-dev');
  preprocessing2('/home/development/code/explicit_args/connective-category.txt');
  #preprocessing('/home/development/code/explicit_args/conll16st/tutorial/conll16st-en-01-12-16-trial');
@@ -1328,7 +1348,8 @@ if __name__ == '__main__':
  #SS_parallel_not_parallel('/home/development/data/conll16st-en-01-12-16-dev', 'test');
  #tSet = SS_parallel_not_parallel('/home/development/code/explicit_args/conll16st/tutorial/conll16st-en-01-12-16-trial', 'test'); 
  #tConn, tSet, SS_conns_parallel_list, SS_conns_not_parallel_list, parse_dict, ps_array = SS_parallel_not_parallel('/home/development/data/conll16st-en-01-12-16-dev', 'test', oa);
- tConn, tSet, SS_conns_parallel_list, SS_conns_not_parallel_list, parse_dict, ps_array = SS_parallel_not_parallel('/home/development/code/connective_explicit/connectiveclassifierfinal', 'test', oa);
+ tConn, tSet, SS_conns_parallel_list, SS_conns_not_parallel_list, parse_dict, ps_array = SS_parallel_not_parallel(testParseFilePath, 'test', oa);
+ #tConn, tSet, SS_conns_parallel_list, SS_conns_not_parallel_list, parse_dict, ps_array = SS_parallel_not_parallel('/home/development/code/connective_explicit/connectiveclassifierfinal', 'test', oa);
  print "SS Parallel Size: " + str(len(SS_conns_parallel_list));
  print "SS Not Parallel Size: " + str(len(SS_conns_not_parallel_list));
  print "tConn: " + str(len(tConn));
@@ -1338,7 +1359,9 @@ if __name__ == '__main__':
  print "Size of Predicted Array: " + str(len(predictedArray));
  temp = mergeSS(tConn, predictedArray, SS_conns_not_parallel_list, parse_dict);
  print "Size of Temp: " + str(len(temp));
- printToFile('/home/development/code/explicit_args/ss_dev_out.json', temp, parse_dict, ps_array); 
+ scorerFile = '/home/development/code/explicit_args/ss_dev_out.json';
+ printToFile(updatedRelationsFile, scorerFile, temp, parse_dict, ps_array);
+ #printToFile('/home/development/code/explicit_args/ss_dev_out.json', temp, parse_dict, ps_array); 
  
  #test_maxent(nltk.classify.MaxentClassifier.ALGORITHMS, trainingSet, testSet);
  #splitSSandPS('/home/development/code/explicit_args/conll16st/tutorial/conll16st-en-01-12-16-trial');
