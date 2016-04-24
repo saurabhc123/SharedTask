@@ -2,42 +2,41 @@
 import json
 import sys
 import explicitconnective.evaluate_connective_classifier_maxent
+import subprocess
 
 class DiscourseParser(object):
 
     def __init__(self):
         pass
 
-    output_relations_file_name = "explicit_connective_relations.json"
+    final_output_file_name = "output.json"
+    explicit_connective_output_file_name = "explicit_connective_relations.json"
+    ps_arg1_extractor_output_file_name = "ps_arg1_extractor_relations.json"
+    ps_arg2_extractor_output_file_name = "ps_arg2_extractor_relations.json"
+    explicit_args_output_file_name = "explicit_args_relations.json"
+    explicit_sense_output_file_name = "explicit_sense_relations.json"
+    explicit_sense_lbj_folder = "/lbj"
 
     def run_connective_classifier(self, input_parses_file, output_path):
-        output_relations_file = output_path + self.output_relations_file_name
+        output_relations_file = output_path + self.explicit_connective_output_file_name
         explicitconnective.evaluate_connective_classifier_maxent.main(input_parses_file, output_relations_file)
 
-    def parse_doc(self, doc, doc_id):
-        output = []
-        num_sentences = len(doc['sentences'])
-        token_id = 0
-        for i in range(num_sentences-1):
-            sentence1 = doc['sentences'][i]
-            len_sentence1 = len(sentence1['words'])
-            token_id += len_sentence1
-            sentence2 = doc['sentences'][i+1]
-            len_sentence2 = len(sentence2['words'])
+    def run_explicit_args_extractor(self,input_parses_file ,output_path):
+        input_relations_file = output_path + self.explicit_connective_output_file_name
+        output_relations_file = output_path + self.explicit_args_output_file_name
 
-            relation = {}
-            relation['DocID'] = doc_id
-            relation['Arg1'] = {}
-            relation['Arg1']['TokenList'] = range((token_id - len_sentence1), token_id - 1)
-            relation['Arg2'] = {}
-            relation['Arg2']['TokenList'] = range(token_id, (token_id + len_sentence2) - 1)
-            relation['Type'] = 'Implicit'
-            relation['Sense'] = ['Expansion.Conjunction']
-            relation['Connective'] = {}
-            relation['Connective']['TokenList'] = []
-            output.append(relation)
-        return output
+    def run_ps_arg1_extractor(self,input_parses_file, output_path):
+        input_relations_file = output_path + self.explicit_args_output_file_name
+        output_relations_file = output_path + self.ps_arg1_extractor_output_file_name
+        return subprocess.call(["PSArg1/runPSArg1Test.sh", input_parses_file, input_relations_file, output_relations_file])
 
+    def run_ps_arg2_extractor(self,input_parses_file, output_path):
+        input_relations_file = output_path + self.ps_arg1_extractor_output_file_name
+        output_relations_file = output_path + self.ps_arg2_extractor_output_file_name
+
+    def run_explicit_sense_classifier(self,input_parses_file ,output_path):
+        input_relations_file = output_path + self.ps_arg2_extractor_output_file_name
+        output_relations_file = output_path + self.explicit_sense_output_file_name
 
 
 if __name__ == '__main__':
@@ -45,4 +44,12 @@ if __name__ == '__main__':
     output_dir = sys.argv[2]
     parser = DiscourseParser()
     parser.run_connective_classifier(input_parses_file, output_dir)
+    parser.run_explicit_args_extractor(input_parses_file, output_dir)
+    if parser.run_ps_arg1_extractor(input_parses_file, output_dir) == 0:
+        if parser.run_ps_arg2_extractor(input_parses_file, output_dir) == 0:
+            parser.run_explicit_sense_classifier(input_parses_file, output_dir)
+        else:
+            print "Error encountered while running the ps_arg2 extractor"
+    else:
+        print "Error encountered while running the ps_arg2 extractor"
 
