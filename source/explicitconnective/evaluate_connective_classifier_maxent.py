@@ -359,10 +359,10 @@ def gen_features(input_file_path, connectivefile):
 
 # ===================================================================================================================================
 
-def main(input_path, model_path, connective_file_name, outputpath):
-        parsefile = input_path + "/parses.json"
-        modelfile = model_path + "/explicitconnective/savedClassifier0414maxentGIStraintestconnonly.json"
-        connective_file = model_path + "/explicitconnective/" + connective_file_name
+def main(parsefile, output_relations_file):
+
+        modelfile = "explicitconnective/savedClassifier0414maxentGIStraintestconnonly.json"
+        connective_file = "explicitconnective/connectivelist"
 
         print "Loading Pre-trained Model..."
         print " "
@@ -427,15 +427,15 @@ def main(input_path, model_path, connective_file_name, outputpath):
                  'Type': 'Explicit', 'ID': fincount})
 
         print "    Writing Scorer-Format Output File to scorerfileconnectiveoutput.json..."
-        import json
-        outputfolder = outputpath + "/explicitconnective"
-        filename = open(outputfolder + "/scorerfileconnectiveoutput.json", "w")
-        for line in scorerfile:
-            print>> filename, json.dumps(line)
-        filename.close()
+        # import json
+        # outputfolder = output_relations_file + "/explicitconnective"
+        # filename = open(outputfolder + "/scorerfileconnectiveoutput.json", "w")
+        # for line in scorerfile:
+        #     print>> filename, json.dumps(line)
+        # filename.close()
 
         print "    Writing Relations File to relations_from_connective_output.json..."
-        filename = open(outputfolder + "/relations_from_connective_output.json", "w")
+        filename = open(output_relations_file, "w")
         for line in relationsfile:
             print>> filename, json.dumps(line)
         filename.close()

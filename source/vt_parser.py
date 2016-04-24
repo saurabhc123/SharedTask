@@ -8,9 +8,11 @@ class DiscourseParser(object):
     def __init__(self):
         pass
 
+    output_relations_file_name = "explicit_connective_relations.json"
 
-    def run_connective_classifier(self, input_path, model_path, output_path):
-        explicitconnective.evaluate_connective_classifier_maxent.main(input_path, model_path, "connectivelist",  output_path)
+    def run_connective_classifier(self, input_parses_file, output_path):
+        output_relations_file = output_path + self.output_relations_file_name
+        explicitconnective.evaluate_connective_classifier_maxent.main(input_parses_file, output_relations_file)
 
     def parse_doc(self, doc, doc_id):
         output = []
@@ -39,9 +41,8 @@ class DiscourseParser(object):
 
 
 if __name__ == '__main__':
-    input_path = sys.argv[1]
-    input_model = sys.argv[2]
-    output_dir = sys.argv[3]
+    input_parses_file = sys.argv[1]
+    output_dir = sys.argv[2]
     parser = DiscourseParser()
-    parser.run_connective_classifier(input_path, input_model, output_dir)
+    parser.run_connective_classifier(input_parses_file, output_dir)
 
