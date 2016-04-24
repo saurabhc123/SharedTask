@@ -8,4 +8,4 @@ topDir=$PWD
 curDirName=$PWD
 #dev data
 echo 'Extracting features'
-python $curDirName/pc2.py $relationsF $parsesF . $outRelations
+python $curDirName/explicit_args/pc2.py $relationsF $parsesF . $outRelations
