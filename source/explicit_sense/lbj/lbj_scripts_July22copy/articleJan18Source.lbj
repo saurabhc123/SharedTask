@@ -1,0 +1,487 @@
+package esl;
+
+import java.util.LinkedList;
+import java.util.Set;
+import LBJ2.nlp.*;
+import LBJ2.nlp.seg.Token;
+import LBJ2.nlp.pos.POSTagger;
+
+
+discrete source(Preposition p) <- 
+{
+	return p.getFeature("source");
+}
+
+discrete% headWordHeadPos(Preposition p) <-
+{
+   if ((p.getFeature("headWordHeadPos")).endsWith("NA")==false)
+      sense p.getFeature("headWordHeadPos");
+}
+discrete% headNumber(Preposition p) <-
+{
+   if ((p.getFeature("headNumber")).endsWith("NA")==false)
+      sense p.getFeature("headNumber");
+}
+discrete% wBefore(Preposition p) <-
+{
+   if ((p.getFeature("wBefore")).endsWith("NA")==false)
+      sense p.getFeature("wBefore");
+}
+discrete% w2Before(Preposition p) <-
+{
+   if ((p.getFeature("w2Before")).endsWith("NA")==false)
+      sense p.getFeature("w2Before");
+}
+discrete% w3Before(Preposition p) <-
+{
+   if ((p.getFeature("w3Before")).endsWith("NA")==false)
+      sense p.getFeature("w3Before");
+}
+discrete% wAfter(Preposition p) <-
+{
+   if ((p.getFeature("wAfter")).endsWith("NA")==false)
+      sense p.getFeature("wAfter");
+}
+discrete% w2After(Preposition p) <-
+{
+   if ((p.getFeature("w2After")).endsWith("NA")==false)
+      sense p.getFeature("w2After");
+}
+discrete% w3After(Preposition p) <-
+{
+   if ((p.getFeature("w3After")).endsWith("NA")==false)
+      sense p.getFeature("w3After");
+}
+discrete% posBefore(Preposition p) <-
+{
+   if ((p.getFeature("posBefore")).endsWith("NA")==false)
+      sense p.getFeature("posBefore");
+}
+discrete% pos2Before(Preposition p) <-
+{
+   if ((p.getFeature("pos2Before")).endsWith("NA")==false)
+      sense p.getFeature("pos2Before");
+}
+discrete% pos3Before(Preposition p) <-
+{
+   if ((p.getFeature("pos3Before")).endsWith("NA")==false)
+      sense p.getFeature("pos3Before");
+}
+discrete% posAfter(Preposition p) <-
+{
+   if ((p.getFeature("posAfter")).endsWith("NA")==false)
+      sense p.getFeature("posAfter");
+}
+discrete% pos2After(Preposition p) <-
+{
+   if ((p.getFeature("pos2After")).endsWith("NA")==false)
+      sense p.getFeature("pos2After");
+}
+discrete% pos3After(Preposition p) <-
+{
+   if ((p.getFeature("pos3After")).endsWith("NA")==false)
+      sense p.getFeature("pos3After");
+}
+discrete% pBpA(Preposition p) <-
+{
+   if ((p.getFeature("pBpA")).endsWith("NA")==false)
+      sense p.getFeature("pBpA");
+}
+discrete% p2BpB(Preposition p) <-
+{
+   if ((p.getFeature("p2BpB")).endsWith("NA")==false)
+      sense p.getFeature("p2BpB");
+}
+discrete% pAp2A(Preposition p) <-
+{
+   if ((p.getFeature("pAp2A")).endsWith("NA")==false)
+      sense p.getFeature("pAp2A");
+}
+discrete% pBwB(Preposition p) <-
+{
+   if ((p.getFeature("pBwB")).endsWith("NA")==false)
+      sense p.getFeature("pBwB");
+}
+discrete% pAwA(Preposition p) <-
+{
+   if ((p.getFeature("pAwA")).endsWith("NA")==false)
+      sense p.getFeature("pAwA");
+}
+discrete% p2Bw2B(Preposition p) <-
+{
+   if ((p.getFeature("p2Bw2B")).endsWith("NA")==false)
+      sense p.getFeature("p2Bw2B");
+}
+discrete% p2Aw2A(Preposition p) <-
+{
+   if ((p.getFeature("p2Aw2A")).endsWith("NA")==false)
+      sense p.getFeature("p2Aw2A");
+}
+discrete% p2BpBpA(Preposition p) <-
+{
+   if ((p.getFeature("p2BpBpA")).endsWith("NA")==false)
+      sense p.getFeature("p2BpBpA");
+}
+discrete% pBpAp2A(Preposition p) <-
+{
+   if ((p.getFeature("pBpAp2A")).endsWith("NA")==false)
+      sense p.getFeature("pBpAp2A");
+}
+discrete% pAp2Ap3A(Preposition p) <-
+{
+   if ((p.getFeature("pAp2Ap3A")).endsWith("NA")==false)
+      sense p.getFeature("pAp2Ap3A");
+}
+discrete% headWord(Preposition p) <-
+{
+   if ((p.getFeature("headWord")).endsWith("NA")==false)
+      sense p.getFeature("headWord");
+}
+discrete% wordsNP(Preposition p) <-
+{
+   if ((p.getFeature("wordsNP")).endsWith("NA")==false)
+      sense p.getFeature("wordsNP");
+}
+discrete% NC(Preposition p) <-
+{
+   if ((p.getFeature("NC")).endsWith("NA")==false)
+      sense p.getFeature("NC");
+}
+discrete% adjAndHead(Preposition p) <-
+{
+   if ((p.getFeature("adjAndHead")).endsWith("NA")==false)
+      sense p.getFeature("adjAndHead");
+}
+discrete% adjTagAndHead(Preposition p) <-
+{
+   if ((p.getFeature("adjTagAndHead")).endsWith("NA")==false)
+      sense p.getFeature("adjTagAndHead");
+}
+discrete% adjAndNC(Preposition p) <-
+{
+   if ((p.getFeature("adjAndNC")).endsWith("NA")==false)
+      sense p.getFeature("adjAndNC");
+}
+discrete% adjTagAndNC(Preposition p) <-
+{
+   if ((p.getFeature("adjTagAndNC")).endsWith("NA")==false)
+      sense p.getFeature("adjTagAndNC");
+}
+discrete% npTagsAndHead(Preposition p) <-
+{
+   if ((p.getFeature("npTagsAndHead")).endsWith("NA")==false)
+      sense p.getFeature("npTagsAndHead");
+}
+discrete% npTagsAndNC(Preposition p) <-
+{
+   if ((p.getFeature("npTagsAndNC")).endsWith("NA")==false)
+      sense p.getFeature("npTagsAndNC");
+}
+discrete% wBeforeWAfter(Preposition p) <-
+{
+   if ((p.getFeature("wBeforeWAfter")).endsWith("NA")==false)
+      sense p.getFeature("wBeforeWAfter");
+}
+discrete% w2BeforeWBefore(Preposition p) <-
+{
+   if ((p.getFeature("w2BeforeWBefore")).endsWith("NA")==false)
+      sense p.getFeature("w2BeforeWBefore");
+}
+discrete% wAfterW2After(Preposition p) <-
+{
+   if ((p.getFeature("wAfterW2After")).endsWith("NA")==false)
+      sense p.getFeature("wAfterW2After");
+}
+discrete% wAfterW2AfterW3After(Preposition p) <-
+{
+   if ((p.getFeature("wAfterW2AfterW3After")).endsWith("NA")==false)
+      sense p.getFeature("wAfterW2AfterW3After");
+}
+discrete% w2BwBwA(Preposition p) <-
+{
+   if ((p.getFeature("w2BwBwA")).endsWith("NA")==false)
+      sense p.getFeature("w2BwBwA");
+}
+discrete% wBwAw2A(Preposition p) <-
+{
+   if ((p.getFeature("wBwAw2A")).endsWith("NA")==false)
+      sense p.getFeature("wBwAw2A");
+}
+discrete% w3Bw2BwB(Preposition p) <-
+{
+   if ((p.getFeature("w3Bw2BwB")).endsWith("NA")==false)
+      sense p.getFeature("w3Bw2BwB");
+}
+discrete% w4Bw3Bw2BwB(Preposition p) <-
+{
+   if ((p.getFeature("w4Bw3Bw2BwB")).endsWith("NA")==false)
+      sense p.getFeature("w4Bw3Bw2BwB");
+}
+discrete% w3Bw2BwBwA(Preposition p) <-
+{
+   if ((p.getFeature("w3Bw2BwBwA")).endsWith("NA")==false)
+      sense p.getFeature("w3Bw2BwBwA");
+}
+discrete% w2BwBwAw2A(Preposition p) <-
+{
+   if ((p.getFeature("w2BwBwAw2A")).endsWith("NA")==false)
+      sense p.getFeature("w2BwBwAw2A");
+}
+discrete% wBwAw2Aw3A(Preposition p) <-
+{
+   if ((p.getFeature("wBwAw2Aw3A")).endsWith("NA")==false)
+      sense p.getFeature("wBwAw2Aw3A");
+}
+discrete% wAw2Aw3Aw4A(Preposition p) <-
+{
+   if ((p.getFeature("wAw2Aw3Aw4A")).endsWith("NA")==false)
+      sense p.getFeature("wAw2Aw3Aw4A");
+}
+discrete% verbObjectAndheadWord(Preposition p) <-
+{
+   if ((p.getFeature("verbObjectAndheadWord")).endsWith("NA")==false)
+      sense p.getFeature("verbObjectAndheadWord");
+}
+discrete% verbObjectAndwordsNP(Preposition p) <-
+{
+   if ((p.getFeature("verbObjectAndwordsNP")).endsWith("NA")==false)
+      sense p.getFeature("verbObjectAndwordsNP");
+}
+discrete% verbObjectAndNC(Preposition p) <-
+{
+   if ((p.getFeature("verbObjectAndNC")).endsWith("NA")==false)
+      sense p.getFeature("verbObjectAndNC");
+}
+discrete% verbObjectAndadjAndHead(Preposition p) <-
+{
+   if ((p.getFeature("verbObjectAndadjAndHead")).endsWith("NA")==false)
+      sense p.getFeature("verbObjectAndadjAndHead");
+}
+discrete% verbObjectAndadjTagAndHead(Preposition p) <-
+{
+   if ((p.getFeature("verbObjectAndadjTagAndHead")).endsWith("NA")==false)
+      sense p.getFeature("verbObjectAndadjTagAndHead");
+}
+discrete% verbObjectAndadjAndNC(Preposition p) <-
+{
+   if ((p.getFeature("verbObjectAndadjAndNC")).endsWith("NA")==false)
+      sense p.getFeature("verbObjectAndadjAndNC");
+}
+discrete% verbObjectAndadjTagAndNC(Preposition p) <-
+{
+   if ((p.getFeature("verbObjectAndadjTagAndNC")).endsWith("NA")==false)
+      sense p.getFeature("verbObjectAndadjTagAndNC");
+}
+discrete% verbObjectAndnpTagsAndHead(Preposition p) <-
+{
+   if ((p.getFeature("verbObjectAndnpTagsAndHead")).endsWith("NA")==false)
+      sense p.getFeature("verbObjectAndnpTagsAndHead");
+}
+discrete% verbObjectAndnpTagsAndNC(Preposition p) <-
+{
+   if ((p.getFeature("verbObjectAndnpTagsAndNC")).endsWith("NA")==false)
+      sense p.getFeature("verbObjectAndnpTagsAndNC");
+}
+discrete% verbObject(Preposition p) <-
+{
+   if ((p.getFeature("verbObject")).endsWith("NA")==false)
+      sense p.getFeature("verbObject");
+}
+discrete% prepBeforeAndheadWord(Preposition p) <-
+{
+   if ((p.getFeature("prepBeforeAndheadWord")).endsWith("NA")==false)
+      sense p.getFeature("prepBeforeAndheadWord");
+}
+discrete% prepBeforeAndwordsNP(Preposition p) <-
+{
+   if ((p.getFeature("prepBeforeAndwordsNP")).endsWith("NA")==false)
+      sense p.getFeature("prepBeforeAndwordsNP");
+}
+discrete% prepBeforeAndNC(Preposition p) <-
+{
+   if ((p.getFeature("prepBeforeAndNC")).endsWith("NA")==false)
+      sense p.getFeature("prepBeforeAndNC");
+}
+discrete% prepBeforeAndadjAndHead(Preposition p) <-
+{
+   if ((p.getFeature("prepBeforeAndadjAndHead")).endsWith("NA")==false)
+      sense p.getFeature("prepBeforeAndadjAndHead");
+}
+discrete% prepBeforeAndadjTagAndHead(Preposition p) <-
+{
+   if ((p.getFeature("prepBeforeAndadjTagAndHead")).endsWith("NA")==false)
+      sense p.getFeature("prepBeforeAndadjTagAndHead");
+}
+discrete% prepBeforeAndadjAndNC(Preposition p) <-
+{
+   if ((p.getFeature("prepBeforeAndadjAndNC")).endsWith("NA")==false)
+      sense p.getFeature("prepBeforeAndadjAndNC");
+}
+discrete% prepBeforeAndadjTagAndNC(Preposition p) <-
+{
+   if ((p.getFeature("prepBeforeAndadjTagAndNC")).endsWith("NA")==false)
+      sense p.getFeature("prepBeforeAndadjTagAndNC");
+}
+discrete% prepBeforeAndnpTagsAndHead(Preposition p) <-
+{
+   if ((p.getFeature("prepBeforeAndnpTagsAndHead")).endsWith("NA")==false)
+      sense p.getFeature("prepBeforeAndnpTagsAndHead");
+}
+discrete% prepBeforeAndnpTagsAndNC(Preposition p) <-
+{
+   if ((p.getFeature("prepBeforeAndnpTagsAndNC")).endsWith("NA")==false)
+      sense p.getFeature("prepBeforeAndnpTagsAndNC");
+}
+discrete% headWordAndverbSubject(Preposition p) <-
+{
+   if ((p.getFeature("headWordAndverbSubject")).endsWith("NA")==false)
+      sense p.getFeature("headWordAndverbSubject");
+}
+discrete% wordsNPAndverbSubject(Preposition p) <-
+{
+   if ((p.getFeature("wordsNPAndverbSubject")).endsWith("NA")==false)
+      sense p.getFeature("wordsNPAndverbSubject");
+}
+discrete% NCAndverbSubject(Preposition p) <-
+{
+   if ((p.getFeature("NCAndverbSubject")).endsWith("NA")==false)
+      sense p.getFeature("NCAndverbSubject");
+}
+discrete% adjAndHeadAndverbSubject(Preposition p) <-
+{
+   if ((p.getFeature("adjAndHeadAndverbSubject")).endsWith("NA")==false)
+      sense p.getFeature("adjAndHeadAndverbSubject");
+}
+discrete% adjTagAndHeadAndverbSubject(Preposition p) <-
+{
+   if ((p.getFeature("adjTagAndHeadAndverbSubject")).endsWith("NA")==false)
+      sense p.getFeature("adjTagAndHeadAndverbSubject");
+}
+discrete% adjAndNCAndverbSubject(Preposition p) <-
+{
+   if ((p.getFeature("adjAndNCAndverbSubject")).endsWith("NA")==false)
+      sense p.getFeature("adjAndNCAndverbSubject");
+}
+discrete% adjTagAndNCAndverbSubject(Preposition p) <-
+{
+   if ((p.getFeature("adjTagAndNCAndverbSubject")).endsWith("NA")==false)
+      sense p.getFeature("adjTagAndNCAndverbSubject");
+}
+discrete% npTagsAndHeadAndverbSubject(Preposition p) <-
+{
+   if ((p.getFeature("npTagsAndHeadAndverbSubject")).endsWith("NA")==false)
+      sense p.getFeature("npTagsAndHeadAndverbSubject");
+}
+discrete% npTagsAndNCAndverbSubject(Preposition p) <-
+{
+   if ((p.getFeature("npTagsAndNCAndverbSubject")).endsWith("NA")==false)
+      sense p.getFeature("npTagsAndNCAndverbSubject");
+}
+discrete% headIsSubject(Preposition p) <-
+{
+   if ((p.getFeature("headIsSubject")).endsWith("NA")==false)
+      sense p.getFeature("headIsSubject");
+}
+discrete% wordsNPIsSubject(Preposition p) <-
+{
+   if ((p.getFeature("wordsNPIsSubject")).endsWith("NA")==false)
+      sense p.getFeature("wordsNPIsSubject");
+}
+discrete% headAndWAfterNP(Preposition p) <-
+{
+   if ((p.getFeature("headAndWAfterNP")).endsWith("NA")==false)
+      sense p.getFeature("headAndWAfterNP");
+}
+discrete% wordsNPAndWAfterNP(Preposition p) <-
+{
+   if ((p.getFeature("wordsNPAndWAfterNP")).endsWith("NA")==false)
+      sense p.getFeature("wordsNPAndWAfterNP");
+}
+discrete% headAndWAfterNPW2AfterNP(Preposition p) <-
+{
+   if ((p.getFeature("headAndWAfterNPW2AfterNP")).endsWith("NA")==false)
+      sense p.getFeature("headAndWAfterNPW2AfterNP");
+}
+discrete% wordsNPAndWAfterNPW2AfterNP(Preposition p) <-
+{
+   if ((p.getFeature("wordsNPAndWAfterNPW2AfterNP")).endsWith("NA")==false)
+      sense p.getFeature("wordsNPAndWAfterNPW2AfterNP");
+}
+discrete% headAndWAfterNPW2AfterNPW3AfterNP(Preposition p) <-
+{
+   if ((p.getFeature("headAndWAfterNPW2AfterNPW3AfterNP")).endsWith("NA")==false)
+      sense p.getFeature("headAndWAfterNPW2AfterNPW3AfterNP");
+}
+discrete% wordsNPAndWAfterNPW2AfterNPW3AfterNP(Preposition p) <-
+{
+   if ((p.getFeature("wordsNPAndWAfterNPW2AfterNPW3AfterNP")).endsWith("NA")==false)
+      sense p.getFeature("wordsNPAndWAfterNPW2AfterNPW3AfterNP");
+}
+discrete% wBeforeAndheadWord(Preposition p) <-
+{
+   if ((p.getFeature("wBeforeAndheadWord")).endsWith("NA")==false)
+      sense p.getFeature("wBeforeAndheadWord");
+}
+discrete% wBeforeAndwordsNP(Preposition p) <-
+{
+   if ((p.getFeature("wBeforeAndwordsNP")).endsWith("NA")==false)
+      sense p.getFeature("wBeforeAndwordsNP");
+}
+discrete% wBeforeAndNC(Preposition p) <-
+{
+   if ((p.getFeature("wBeforeAndNC")).endsWith("NA")==false)
+      sense p.getFeature("wBeforeAndNC");
+}
+discrete% wBeforeAndadjAndHead(Preposition p) <-
+{
+   if ((p.getFeature("wBeforeAndadjAndHead")).endsWith("NA")==false)
+      sense p.getFeature("wBeforeAndadjAndHead");
+}
+discrete% wBeforeAndadjTagAndHead(Preposition p) <-
+{
+   if ((p.getFeature("wBeforeAndadjTagAndHead")).endsWith("NA")==false)
+      sense p.getFeature("wBeforeAndadjTagAndHead");
+}
+discrete% wBeforeAndadjAndNC(Preposition p) <-
+{
+   if ((p.getFeature("wBeforeAndadjAndNC")).endsWith("NA")==false)
+      sense p.getFeature("wBeforeAndadjAndNC");
+}
+discrete% wBeforeAndadjTagAndNC(Preposition p) <-
+{
+   if ((p.getFeature("wBeforeAndadjTagAndNC")).endsWith("NA")==false)
+      sense p.getFeature("wBeforeAndadjTagAndNC");
+}
+discrete% wBeforeAndnpTagsAndHead(Preposition p) <-
+{
+   if ((p.getFeature("wBeforeAndnpTagsAndHead")).endsWith("NA")==false)
+      sense p.getFeature("wBeforeAndnpTagsAndHead");
+}
+discrete% wBeforeAndnpTagsAndNC(Preposition p) <-
+{
+   if ((p.getFeature("wBeforeAndnpTagsAndNC")).endsWith("NA")==false)
+      sense p.getFeature("wBeforeAndnpTagsAndNC");
+}
+
+discrete PLabel(Preposition p) <- { return p.label; }
+
+discrete PrepositionUnconfuse(Preposition p) <-
+learn PLabel
+  using
+	 wBefore, w2Before, w3Before, wAfter, w2After, w3After, posBefore, pos2Before, pos3Before, posAfter, pos2After,  pos3After, wBeforeWAfter,w2BeforeWBefore, wAfterW2After,pBpA, p2BpB, pAp2A, pBwB, pAwA, p2Bw2B, p2Aw2A,  wAfterW2AfterW3After, pAp2Ap3A, headWord, headWordHeadPos, wBeforeAndheadWord,headNumber, source
+  from new PrepositionParser(new ColumnFormat(Constants.trainingData))
+   6 rounds
+with SparseNetworkLearner
+{
+SparseAveragedPerceptron.Parameters p =
+new SparseAveragedPerceptron.Parameters();
+p.learningRate =0.1;
+p.positiveThickness =4;
+p.negativeThickness =2;
+baseLTU = new SparseAveragedPerceptron(p);
+}
+
+  preExtract true
+  progressOutput 100000
+end
+

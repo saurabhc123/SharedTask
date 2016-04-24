@@ -1,0 +1,75 @@
+package esl;
+
+import LBJ2.nlp.*;
+import LBJ2.nlp.seg.Token;
+import LBJ2.parse.*;
+
+public class Preposition
+{
+   public LinkedVector sentence;
+//   public LinkedVector sentenceWithoutPrep; //same as origSentence but with preposition removed
+			
+   public int startPhrase, endPhrase; //indices of first and last members of preposition (for multi-word prepositions)
+   public String label; //label 'with', 'on', 'before', etc.
+   protected String[] wordFeatures;
+   
+   //maybe add more variables here for other features
+public static final String[][] features=
+{
+{"source","0"}, {"label","1"}, {"startend","2"}, {"exampleID","3"}, {"wBefore","4"}, {"wAfter","5"}, {"wBWA","6"}, {"w2BWB","7"}, {"wAW2A","8"}, {"wAW2AW3A","9"}, {"w2BwBwA","10"}, {"wBwAw2A","11"}, {"w3Bw2BwB","12"}, {"w4Bw3Bw2BwB","13"}, {"w3Bw2BwBwA","14"}, {"w2BwBwAw2A","15"}, {"wBwAw2Aw3A","16"}, {"wAw2Aw3Aw4A","17"}, 
+};
+//System.out.println(1);
+   public  Preposition (LinkedVector sen, int s, int e, String lab, String[] currentFeatures)
+   {
+	startPhrase = s;//index of first word of prep
+	
+	endPhrase = e;//index of last word of prep
+	label = lab;
+	sentence=sen;
+	wordFeatures=currentFeatures;
+//	sentenceWithoutPrep = getPhraseSentence(sen)
+   }
+
+
+  //return word immediately before the noun phrase
+  public Token getPrevious()
+  {
+    if (startPhrase - 1 >= 0) return (Token) sentence.get(startPhrase - 1);
+    return null;
+  }
+
+  //return word immediately after the noun phrase
+  public Token getNext()
+  {
+    if (endPhrase + 1 < sentence.size()) return (Token) sentence.get(endPhrase + 1);
+    return null;
+  }
+
+  public String toString()
+  {
+    String result = ((Token) sentence.get(startPhrase)).form;
+    for (int i = startPhrase + 1; i <= endPhrase; ++i)
+    {
+      result +=" ";
+      result += ((Token) sentence.get(i)).form;
+    }
+    return result;
+  }
+ 
+
+  public String getFeature(String featureName)
+  {
+	int featureIndex=-1;
+	for (int i=0; i<features.length;i++)
+	{
+	    if (features[i][0].equals(featureName))
+	    {
+		featureIndex = Integer.parseInt(features[i][1]);
+		break;
+	    }
+	}
+	
+	return (String) wordFeatures[featureIndex];		
+  }
+}
+  

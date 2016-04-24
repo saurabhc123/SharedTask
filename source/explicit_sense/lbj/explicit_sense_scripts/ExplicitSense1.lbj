@@ -1,0 +1,182 @@
+package esl;
+
+import java.util.LinkedList;
+import java.util.Set;
+import LBJ2.nlp.*;
+//import LBJ2.nlp.seg.Token;
+//import LBJ2.nlp.pos.POSTagger;
+
+
+discrete source(Preposition p) <- 
+{
+	return p.getFeature("source");
+}
+
+discrete% f01(Preposition p) <-
+{
+   if ((p.getFeature("f01")).endsWith("NA")==false)
+      sense p.getFeature("f01");
+}
+discrete% f02(Preposition p) <-
+{
+   if ((p.getFeature("f02")).endsWith("NA")==false)
+      sense p.getFeature("f02");
+}
+discrete% f03(Preposition p) <-
+{
+   if ((p.getFeature("f03")).endsWith("NA")==false)
+      sense p.getFeature("f03");
+}
+discrete% f04(Preposition p) <-
+{
+   if ((p.getFeature("f04")).endsWith("NA")==false)
+      sense p.getFeature("f04");
+}
+discrete% f05(Preposition p) <-
+{
+   if ((p.getFeature("f05")).endsWith("NA")==false)
+      sense p.getFeature("f05");
+}
+discrete% f06(Preposition p) <-
+{
+   if ((p.getFeature("f06")).endsWith("NA")==false)
+      sense p.getFeature("f06");
+}
+discrete% f07(Preposition p) <-
+{
+   if ((p.getFeature("f07")).endsWith("NA")==false)
+      sense p.getFeature("f07");
+}
+discrete% f08(Preposition p) <-
+{
+   if ((p.getFeature("f08")).endsWith("NA")==false)
+      sense p.getFeature("f08");
+}
+discrete% f09(Preposition p) <-
+{
+   if ((p.getFeature("f09")).endsWith("NA")==false)
+      sense p.getFeature("f09");
+}
+discrete% f10(Preposition p) <-
+{
+   if ((p.getFeature("f10")).endsWith("NA")==false)
+      sense p.getFeature("f10");
+}
+discrete% f11(Preposition p) <-
+{
+   if ((p.getFeature("f11")).endsWith("NA")==false)
+      sense p.getFeature("f11");
+}
+discrete% f12(Preposition p) <-
+{
+   if ((p.getFeature("f12")).endsWith("NA")==false)
+      sense p.getFeature("f12");
+}
+discrete% f13(Preposition p) <-
+{
+   if ((p.getFeature("f13")).endsWith("NA")==false)
+      sense p.getFeature("f13");
+}
+discrete% f14(Preposition p) <-
+{
+   if ((p.getFeature("f14")).endsWith("NA")==false)
+      sense p.getFeature("f14");
+}
+discrete% f15(Preposition p) <-
+{
+   if ((p.getFeature("f15")).endsWith("NA")==false)
+      sense p.getFeature("f15");
+}
+discrete% f16(Preposition p) <-
+{
+   if ((p.getFeature("f16")).endsWith("NA")==false)
+      sense p.getFeature("f16");
+}
+discrete% f17(Preposition p) <-
+{
+   if ((p.getFeature("f17")).endsWith("NA")==false)
+      sense p.getFeature("f17");
+}
+discrete% f18(Preposition p) <-
+{
+   if ((p.getFeature("f18")).endsWith("NA")==false)
+      sense p.getFeature("f18");
+}
+discrete% f19(Preposition p) <-
+{
+   if ((p.getFeature("f19")).endsWith("NA")==false)
+      sense p.getFeature("f19");
+}
+discrete% f20(Preposition p) <-
+{
+   if ((p.getFeature("f20")).endsWith("NA")==false)
+      sense p.getFeature("f20");
+}
+discrete% f21(Preposition p) <-
+{
+   if ((p.getFeature("f21")).endsWith("NA")==false)
+      sense p.getFeature("f21");
+}
+discrete% f22(Preposition p) <-
+{
+   if ((p.getFeature("f22")).endsWith("NA")==false)
+      sense p.getFeature("f22");
+}
+discrete% f23(Preposition p) <-
+{
+   if ((p.getFeature("f23")).endsWith("NA")==false)
+      sense p.getFeature("f23");
+}
+discrete% f24(Preposition p) <-
+{
+   if ((p.getFeature("f24")).endsWith("NA")==false)
+      sense p.getFeature("f24");
+}
+discrete% f25(Preposition p) <-
+{
+   if ((p.getFeature("f25")).endsWith("NA")==false)
+      sense p.getFeature("f25");
+}
+discrete% f26(Preposition p) <-
+{
+   if ((p.getFeature("f26")).endsWith("NA")==false)
+      sense p.getFeature("f26");
+}
+discrete% f27(Preposition p) <-
+{
+   if ((p.getFeature("f27")).endsWith("NA")==false)
+      sense p.getFeature("f27");
+}
+discrete% f28(Preposition p) <-
+{
+   if ((p.getFeature("f28")).endsWith("NA")==false)
+      sense p.getFeature("f28");
+}
+discrete% f29(Preposition p) <-
+{
+   if ((p.getFeature("f29")).endsWith("NA")==false)
+      sense p.getFeature("f29");
+}
+
+discrete PLabel(Preposition p) <- { return p.label; }
+
+discrete PrepositionUnconfuse(Preposition p) <-
+learn PLabel
+  using
+	f01, f02, f03, f04, f05, f06, f07, f08, f09, f10
+  from new PrepositionParser(new ColumnFormat(Constants.trainingData))
+   10 rounds
+with SparseNetworkLearner
+{
+SparseAveragedPerceptron.Parameters p =
+new SparseAveragedPerceptron.Parameters();
+p.learningRate =0.1;
+p.positiveThickness =10;
+p.negativeThickness =0;
+baseLTU = new SparseAveragedPerceptron(p);
+}
+
+  preExtract true
+  progressOutput 100000
+end
+

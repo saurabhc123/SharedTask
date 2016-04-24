@@ -1,0 +1,82 @@
+package esl;
+
+import java.util.LinkedList;
+import java.util.Set;
+import LBJ2.nlp.*;
+import LBJ2.nlp.seg.Token;
+import LBJ2.nlp.pos.POSTagger;
+
+
+discrete source(Preposition p) <- 
+{
+	return p.getFeature("source");
+}
+
+discrete% wBefore(Preposition p) <-
+{
+   if ((p.getFeature("wBefore")).endsWith("NA")==false)
+      sense p.getFeature("wBefore");
+}
+discrete% wAfter(Preposition p) <-
+{
+   if ((p.getFeature("wAfter")).endsWith("NA")==false)
+      sense p.getFeature("wAfter");
+}
+discrete% wBWA(Preposition p) <-
+{
+   if ((p.getFeature("wBWA")).endsWith("NA")==false)
+      sense p.getFeature("wBWA");
+}
+discrete% w2BWB(Preposition p) <-
+{
+   if ((p.getFeature("w2BWB")).endsWith("NA")==false)
+      sense p.getFeature("w2BWB");
+}
+discrete% wAW2A(Preposition p) <-
+{
+   if ((p.getFeature("wAW2A")).endsWith("NA")==false)
+      sense p.getFeature("wAW2A");
+}
+discrete% wAW2AW3A(Preposition p) <-
+{
+   if ((p.getFeature("wAW2AW3A")).endsWith("NA")==false)
+      sense p.getFeature("wAW2AW3A");
+}
+discrete% w2BwBwA(Preposition p) <-
+{
+   if ((p.getFeature("w2BwBwA")).endsWith("NA")==false)
+      sense p.getFeature("w2BwBwA");
+}
+discrete% wBwAw2A(Preposition p) <-
+{
+   if ((p.getFeature("wBwAw2A")).endsWith("NA")==false)
+      sense p.getFeature("wBwAw2A");
+}
+discrete% w3Bw2BwB(Preposition p) <-
+{
+   if ((p.getFeature("w3Bw2BwB")).endsWith("NA")==false)
+      sense p.getFeature("w3Bw2BwB");
+}
+
+discrete PLabel(Preposition p) <- { return p.label; }
+
+discrete PrepositionUnconfuse(Preposition p) <-
+learn PLabel
+  using
+	wBefore, wAfter, wBWA, w2BWB, wAW2A, wAW2AW3A, w2BwBwA, wBwAw2A, w3Bw2BwB
+  from new PrepositionParser(new ColumnFormat(Constants.trainingData))
+   10 rounds
+with SparseNetworkLearner
+{
+SparseAveragedPerceptron.Parameters p =
+new SparseAveragedPerceptron.Parameters();
+p.learningRate =0.1;
+p.positiveThickness =10;
+p.negativeThickness =0;
+baseLTU = new SparseAveragedPerceptron(p);
+}
+
+  preExtract true
+  progressOutput 100000
+end
+

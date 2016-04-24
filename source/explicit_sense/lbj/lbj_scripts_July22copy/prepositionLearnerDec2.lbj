@@ -1,0 +1,149 @@
+package esl;
+
+import java.util.LinkedList;
+import java.util.Set;
+import LBJ2.nlp.*;
+import LBJ2.nlp.seg.Token;
+import LBJ2.nlp.pos.POSTagger;
+
+
+discrete source(Preposition p) <- 
+{
+	return p.getFeature("source");
+}
+
+discrete% wBefore(Preposition p) <-
+{
+   if ((p.getFeature("wBefore")).endsWith("NA")==false)
+      sense p.getFeature("wBefore");
+}
+discrete% wAfter(Preposition p) <-
+{
+   if ((p.getFeature("wAfter")).endsWith("NA")==false)
+      sense p.getFeature("wAfter");
+}
+discrete% wBeforeWAfter(Preposition p) <-
+{
+   if ((p.getFeature("wBeforeWAfter")).endsWith("NA")==false)
+      sense p.getFeature("wBeforeWAfter");
+}
+discrete% w2BeforeWBefore(Preposition p) <-
+{
+   if ((p.getFeature("w2BeforeWBefore")).endsWith("NA")==false)
+      sense p.getFeature("w2BeforeWBefore");
+}
+discrete% wAfterW2After(Preposition p) <-
+{
+   if ((p.getFeature("wAfterW2After")).endsWith("NA")==false)
+      sense p.getFeature("wAfterW2After");
+}
+discrete% wAfterW2AfterW3After(Preposition p) <-
+{
+   if ((p.getFeature("wAfterW2AfterW3After")).endsWith("NA")==false)
+      sense p.getFeature("wAfterW2AfterW3After");
+}
+discrete% w2BwBwA(Preposition p) <-
+{
+   if ((p.getFeature("w2BwBwA")).endsWith("NA")==false)
+      sense p.getFeature("w2BwBwA");
+}
+discrete% wBwAw2A(Preposition p) <-
+{
+   if ((p.getFeature("wBwAw2A")).endsWith("NA")==false)
+      sense p.getFeature("wBwAw2A");
+}
+discrete% w3Bw2BwB(Preposition p) <-
+{
+   if ((p.getFeature("w3Bw2BwB")).endsWith("NA")==false)
+      sense p.getFeature("w3Bw2BwB");
+}
+discrete% w4Bw3Bw2BwB(Preposition p) <-
+{
+   if ((p.getFeature("w4Bw3Bw2BwB")).endsWith("NA")==false)
+      sense p.getFeature("w4Bw3Bw2BwB");
+}
+discrete% w3Bw2BwBwA(Preposition p) <-
+{
+   if ((p.getFeature("w3Bw2BwBwA")).endsWith("NA")==false)
+      sense p.getFeature("w3Bw2BwBwA");
+}
+discrete% w2BwBwAw2A(Preposition p) <-
+{
+   if ((p.getFeature("w2BwBwAw2A")).endsWith("NA")==false)
+      sense p.getFeature("w2BwBwAw2A");
+}
+discrete% wBwAw2Aw3A(Preposition p) <-
+{
+   if ((p.getFeature("wBwAw2Aw3A")).endsWith("NA")==false)
+      sense p.getFeature("wBwAw2Aw3A");
+}
+discrete% wAw2Aw3Aw4A(Preposition p) <-
+{
+   if ((p.getFeature("wAw2Aw3Aw4A")).endsWith("NA")==false)
+      sense p.getFeature("wAw2Aw3Aw4A");
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+discrete PLabel(Preposition p) <- { return p.label; }
+
+discrete PrepositionUnconfuse(Preposition p) <-
+learn PLabel
+  using
+	wBefore, wAfter, wBeforeWAfter, w2BeforeWBefore, wAfterW2After, wAfterW2AfterW3After, w2BwBwA, wBwAw2A, w3Bw2BwB, w4Bw3Bw2BwB, w3Bw2BwBwA, w2BwBwAw2A, wBwAw2Aw3A, wAw2Aw3Aw4A
+  from new PrepositionParser(new ColumnFormat(Constants.trainingData))
+   6 rounds
+with SparseNetworkLearner
+{
+SparseAveragedPerceptron.Parameters p =
+new SparseAveragedPerceptron.Parameters();
+p.learningRate =0.1;
+p.positiveThickness =10;
+p.negativeThickness =0;
+baseLTU = new SparseAveragedPerceptron(p);
+}
+
+  preExtract true
+  progressOutput 100000
+end
+

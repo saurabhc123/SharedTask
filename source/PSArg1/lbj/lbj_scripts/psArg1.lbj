@@ -1,0 +1,172 @@
+package esl;
+
+import java.util.LinkedList;
+import java.util.Set;
+import LBJ2.nlp.*;
+//import LBJ2.nlp.seg.Token;
+//import LBJ2.nlp.pos.POSTagger;
+
+
+discrete source(Preposition p) <- 
+{
+	return p.getFeature("source");
+}
+
+discrete% isLast(Preposition p) <-
+{
+   if ((p.getFeature("isLast")).endsWith("NA")==false)
+      sense p.getFeature("isLast");
+}
+discrete% isFirst(Preposition p) <-
+{
+   if ((p.getFeature("isFirst")).endsWith("NA")==false)
+      sense p.getFeature("isFirst");
+}
+discrete% sameAsSent(Preposition p) <-
+{
+   if ((p.getFeature("sameAsSent")).endsWith("NA")==false)
+      sense p.getFeature("sameAsSent");
+}
+discrete% cString(Preposition p) <-
+{
+   if ((p.getFeature("cString")).endsWith("NA")==false)
+      sense p.getFeature("cString");
+}
+discrete% curFirstWord(Preposition p) <-
+{
+   if ((p.getFeature("curFirstWord")).endsWith("NA")==false)
+      sense p.getFeature("curFirstWord");
+}
+discrete% curLastWord(Preposition p) <-
+{
+   if ((p.getFeature("curLastWord")).endsWith("NA")==false)
+      sense p.getFeature("curLastWord");
+}
+discrete% curFirstSecond(Preposition p) <-
+{
+   if ((p.getFeature("curFirstSecond")).endsWith("NA")==false)
+      sense p.getFeature("curFirstSecond");
+}
+discrete% prevLast(Preposition p) <-
+{
+   if ((p.getFeature("prevLast")).endsWith("NA")==false)
+      sense p.getFeature("prevLast");
+}
+discrete% nextFirst(Preposition p) <-
+{
+   if ((p.getFeature("nextFirst")).endsWith("NA")==false)
+      sense p.getFeature("nextFirst");
+}
+discrete% prevLastCurFirst(Preposition p) <-
+{
+   if ((p.getFeature("prevLastCurFirst")).endsWith("NA")==false)
+      sense p.getFeature("prevLastCurFirst");
+}
+discrete% curLastNextFirst(Preposition p) <-
+{
+   if ((p.getFeature("curLastNextFirst")).endsWith("NA")==false)
+      sense p.getFeature("curLastNextFirst");
+}
+discrete% commaBefore(Preposition p) <-
+{
+   if ((p.getFeature("commaBefore")).endsWith("NA")==false)
+      sense p.getFeature("commaBefore");
+}
+discrete% commaAfter(Preposition p) <-
+{
+   if ((p.getFeature("commaAfter")).endsWith("NA")==false)
+      sense p.getFeature("commaAfter");
+}
+discrete% curFirstPOS(Preposition p) <-
+{
+   if ((p.getFeature("curFirstPOS")).endsWith("NA")==false)
+      sense p.getFeature("curFirstPOS");
+}
+discrete% curLastPOS(Preposition p) <-
+{
+   if ((p.getFeature("curLastPOS")).endsWith("NA")==false)
+      sense p.getFeature("curLastPOS");
+}
+discrete% curFirstSecondPOS(Preposition p) <-
+{
+   if ((p.getFeature("curFirstSecondPOS")).endsWith("NA")==false)
+      sense p.getFeature("curFirstSecondPOS");
+}
+discrete% prevLastPOS(Preposition p) <-
+{
+   if ((p.getFeature("prevLastPOS")).endsWith("NA")==false)
+      sense p.getFeature("prevLastPOS");
+}
+discrete% nextFirstPOS(Preposition p) <-
+{
+   if ((p.getFeature("nextFirstPOS")).endsWith("NA")==false)
+      sense p.getFeature("nextFirstPOS");
+}
+discrete% prevLastAndComma(Preposition p) <-
+{
+   if ((p.getFeature("prevLastAndComma")).endsWith("NA")==false)
+      sense p.getFeature("prevLastAndComma");
+}
+discrete% nextFirstAndComma(Preposition p) <-
+{
+   if ((p.getFeature("nextFirstAndComma")).endsWith("NA")==false)
+      sense p.getFeature("nextFirstAndComma");
+}
+discrete% commaAndcurFirstWord(Preposition p) <-
+{
+   if ((p.getFeature("commaAndcurFirstWord")).endsWith("NA")==false)
+      sense p.getFeature("commaAndcurFirstWord");
+}
+discrete% curLastWordAndComma(Preposition p) <-
+{
+   if ((p.getFeature("curLastWordAndComma")).endsWith("NA")==false)
+      sense p.getFeature("curLastWordAndComma");
+}
+discrete% commaAndcurFirstPOS(Preposition p) <-
+{
+   if ((p.getFeature("commaAndcurFirstPOS")).endsWith("NA")==false)
+      sense p.getFeature("commaAndcurFirstPOS");
+}
+discrete% curLastPOSAndComma(Preposition p) <-
+{
+   if ((p.getFeature("curLastPOSAndComma")).endsWith("NA")==false)
+      sense p.getFeature("curLastPOSAndComma");
+}
+discrete% verb1(Preposition p) <-
+{
+   if ((p.getFeature("verb1")).endsWith("NA")==false)
+      sense p.getFeature("verb1");
+}
+discrete% verb2(Preposition p) <-
+{
+   if ((p.getFeature("verb2")).endsWith("NA")==false)
+      sense p.getFeature("verb2");
+}
+discrete% verb3(Preposition p) <-
+{
+   if ((p.getFeature("verb3")).endsWith("NA")==false)
+      sense p.getFeature("verb3");
+}
+
+discrete PLabel(Preposition p) <- { return p.label; }
+
+discrete PrepositionUnconfuse(Preposition p) <-
+learn PLabel
+  using
+	isLast, isFirst, sameAsSent, cString, curFirstWord, curLastWord, curFirstSecond, prevLast, nextFirst, prevLastCurFirst, curLastNextFirst, commaBefore, commaAfter, curFirstPOS, curLastPOS, curFirstSecondPOS, prevLastPOS, nextFirstPOS, prevLastAndComma, nextFirstAndComma, commaAndcurFirstWord, curLastWordAndComma, commaAndcurFirstPOS, curLastPOSAndComma, verb1, verb2, verb3
+  from new PrepositionParser(new ColumnFormat(Constants.trainingData))
+   10 rounds
+with SparseNetworkLearner
+{
+SparseAveragedPerceptron.Parameters p =
+new SparseAveragedPerceptron.Parameters();
+p.learningRate =0.1;
+p.positiveThickness =10;
+p.negativeThickness =0;
+baseLTU = new SparseAveragedPerceptron(p);
+}
+
+  preExtract true
+  progressOutput 100000
+end
+
