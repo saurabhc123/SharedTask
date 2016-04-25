@@ -9,4 +9,4 @@ topDir=$PWD
 curDirName=$PWD
 #dev data
 echo 'Extracting features for explicit senses'
-python $curDirName/explicit_sense/explicit_sense_perceptron_predict.py $relationsF $parsesF $lblFolder $outRelations
+python $curDirName/explicit_sense/explicit_sense_perceptron_predict.py $relationsF $parsesF $lbjFolder $outRelations
