@@ -16,7 +16,7 @@ class DiscourseParser(object):
     ps_arg2_extractor_output_file_name = "ps_arg2_extractor_relations.json"
     explicit_args_output_file_name = "explicit_args_relations.json"
     explicit_sense_output_file_name = "explicit_sense_relations.json"
-    explicit_sense_lbj_folder = "/lbj"
+    explicit_sense_lbj_folder = "explicit_sense/lbj"
 
     def run_connective_classifier(self, input_parses_file, output_path):
         output_relations_file = output_path + self.explicit_connective_output_file_name
@@ -31,15 +31,16 @@ class DiscourseParser(object):
         input_relations_file = output_path + self.explicit_args_output_file_name
         output_relations_file = output_path + self.ps_arg1_extractor_output_file_name
         os.system("PSArg1/runPSArg1Test.sh %s %s %s" % (input_parses_file, input_relations_file, output_relations_file))
-        #return subprocess.call(["PSArg1/runPSArg1Test.sh", input_parses_file, input_relations_file, output_relations_file])
 
     def run_ps_arg2_extractor(self,input_parses_file, output_path):
         input_relations_file = output_path + self.ps_arg1_extractor_output_file_name
         output_relations_file = output_path + self.ps_arg2_extractor_output_file_name
+        os.system("PSArg1/runPSArg2Test.sh %s %s %s" % (input_parses_file, input_relations_file, output_relations_file))
 
     def run_explicit_sense_classifier(self,input_parses_file ,output_path):
         input_relations_file = output_path + self.ps_arg2_extractor_output_file_name
         output_relations_file = output_path + self.explicit_sense_output_file_name
+        os.system("explicit_args/runExplicitSense.sh %s %s %s %s" % (input_relations_file, input_parses_file, self.explicit_sense_lbj_folder, output_relations_file))
 
 
 if __name__ == '__main__':
@@ -55,4 +56,5 @@ if __name__ == '__main__':
             print "Error encountered while running the ps_arg2 extractor"
     else:
         print "Error encountered while running the ps_arg2 extractor"
+
 
