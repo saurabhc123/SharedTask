@@ -783,8 +783,8 @@ if __name__ == '__main__':
     parser.add_argument('relationsfile', help='Path to relations.json')
     parser.add_argument('parsesfile', help='Path to parses.json')
     parser.add_argument('modeldir', help='Path to pre-trained classifier model directory')
-    parser.add_argument('outputdir',
-                        help='Directory for saving output files: relations-explicit-sense.json and scorer-format output file')
+    parser.add_argument('outputfile',
+                        help='Path to the output files (relations.json)')
     args = parser.parse_args()
 
     if len(sys.argv) < 4:
@@ -792,7 +792,7 @@ if __name__ == '__main__':
         print "relationsfile : default relations.json"
         print "parsesfile : default parses.json"
         print "modeldir : default lbj"
-        print "outputdir : default . (current folder)"
+        print "outputfile : default ./relations.json"
         print "Thus, the default command to run would be:"
         print "    python explicit_sense_perceptron_predict.py parses.json lbj ."
         sys.exit(1)
@@ -828,12 +828,11 @@ if __name__ == '__main__':
     print '\nClassifying using existing model DONE in', '{0:.2f}'.format(timeCost), 'Seconds'
 
     #Export predictions for official scorer
-    outputJsonFile = args.outputdir + os.sep + 'output-dev.json'
     #outputJsonFile = os.getcwd() + os.sep + 'output-dev.json'
-    exportLBJPredictions(LBJPredictionFile, outputJsonFile)
+    #exportLBJPredictions(LBJPredictionFile, outputJsonFile)
     
     #Update the relations with predicted sense and export the updated relations for other classifiers
-    updatedRelationsFile = args.outputdir + os.sep + 'relations-explicit-sense.json.json'
+    updatedRelationsFile = args.outputfile
     #updatedRelationsFile = os.getcwd() + os.sep + 'relations-explicit-sense.json.json'
     exportUpdatedRelations(LBJPredictionFile, updatedRelationsFile)
     
