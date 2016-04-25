@@ -40,7 +40,7 @@ class DiscourseParser(object):
     def run_explicit_sense_classifier(self,input_parses_file ,output_path):
         input_relations_file = output_path + self.ps_arg2_extractor_output_file_name
         output_relations_file = output_path + self.explicit_sense_output_file_name
-        os.system("explicit_args/runExplicitSense.sh %s %s %s %s" % (input_relations_file, input_parses_file, self.explicit_sense_lbj_folder, output_relations_file))
+        os.system("explicit_sense/runExplicitSense.sh %s %s %s %s" % (input_relations_file, input_parses_file, self.explicit_sense_lbj_folder, output_relations_file))
 
 
 if __name__ == '__main__':
