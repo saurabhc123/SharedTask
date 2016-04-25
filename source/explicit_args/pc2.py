@@ -1218,7 +1218,7 @@ def printToFile(relFile, outFile, temp, parse_dict, ps_array):
    t.write(str(conn_indices));
    t.write("\n");
  '''
-
+ '''
  with open(outFile, 'w') as f:
   index = 0;
   for data in temp:
@@ -1237,32 +1237,9 @@ def printToFile(relFile, outFile, temp, parse_dict, ps_array):
    dictEntry['Sense'] = ["Expansion.Conjunction"];
    dictEntry['Type'] = 'Explicit';
    #dictEntry['Arg1Pos'] = 'SS'; 
-
-   '''
-   arg1 = [];
-   print "Arg 1: " + str(data[4]);
-   for element in data[4]:
-    print "Arg 1 Element: " + str(element);
-    arg1.append(sentToDocToken[(docID, data[2]-1, element+1)]); 
-   #entryDict['Arg1'] = dict({"TokenList":arg1}); 
-   arg2 = [];
-   print "Arg 2: " + str(data[5]);
-   for el in data[5]:
-    print "Arg 2 Element: " + str(el);
-    arg2.append(sentToDocToken[(docID, data[2]-1, el+1)]);
-   #entryDict['Arg2'] = dict({"TokenList":arg2});
-   conn_indices = [];
-   print "Conn Indices: " + str(data[3]);
-   for e in data[3]:
-    print "Conn Indices Element: " + str(e);
-    conn_indices.append(sentToDocToken[(docID, data[2], e+1)]);
-   #entryDict['Connective'] = dict({"TokenList":conn_indices});
-   dictEntry['Sense'] = ["Expansion.Conjunction"];
-   dictEntry['Type'] = 'Explicit';
-   '''
    json.dump(dictEntry, f)
    f.write("\n");
-
+  '''
  print "Dict Sentence: " + str(dictSentenceToken);
  print "Dict Document: " + str(dictDocumentToken);
  with open(relFile, 'a') as p:
