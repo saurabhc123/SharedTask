@@ -1,6 +1,6 @@
 Traceback (most recent call last):
-  File "/home/saurabc/production/SharedTask/source/PSArg1/psArg1.py", line 16, in <module>
-    relationsF=codecs.open(relationsFile, encoding='utf8')
-  File "/usr/lib64/python2.7/codecs.py", line 881, in open
-    file = __builtin__.open(filename, mode, buffering)
-IOError: [Errno 2] No such file or directory: '../../output/explicit_connective_relations.json'
+  File "/home/saurabc/production/SharedTask/source/PSArg1/psArg1.py", line 312, in <module>
+    relationDict=func.makeRelationDict(relations)
+  File "/home/saurabc/production/SharedTask/source/PSArg1/func.py", line 145, in makeRelationDict
+    relID=relation['ID']
+KeyError: 'ID'

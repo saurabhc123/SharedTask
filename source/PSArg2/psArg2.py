@@ -21,7 +21,7 @@ outF=open(argv[3],'w')
 parseDict=json.load(parsesF)
 relations = [json.loads(x) for x in relationsF]
 
-verbListF=open("resources/verbList.txt",'r')
+verbListF=open("PSArg2/resources/verbList.txt",'r')
 verbList={}
 for l in verbListF:
 	terms=l.split()

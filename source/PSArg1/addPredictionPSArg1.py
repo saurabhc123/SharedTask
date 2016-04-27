@@ -60,14 +60,15 @@ def makeRelationsDictForOutput(relationDict,psArg1PredictionsDict,dictByDocID):
 				   #print >>stderr, 'tokenID', tokenID
 				   arg1PSTokenIDs.append(tokenID)
 			#***baseline***: set Arg1 to be entire sentence
-			if relID not in psArg1PredictionsDict:
-				print >>stderr, 'Baseline'
+			if relID not in psArg1PredictionsDict or psArg1PredictionsDict[relID]==[]:
+				print >>stderr, 'Baseline', relID
 				arg1PSTokenIDs=tokenIDsSent[:-1]
 			#arg1PSTokenIDs=tokenIDsSent[:-1]
 			#****************************#
 			#compare gold and predcited PS Arg1
 			if relID in psArg1PredictionsDict:
 			   predictedClausesArg1=psArg1PredictionsDict[relID]
+			   print >>stderr, relID, predictedClausesArg1
 			 #getCompareGoldPredictedPSArg1(predictedClausesArg1,dictByDocID,relation,relID,docID,sentID)		   
 			   getCompareGoldPredictedPSArg1(predictedClausesArg1,dictByDocID,relation,relID,docID,arg1SentID,arg1PSWordList)
 			#*****************************#
