@@ -228,8 +228,8 @@ def readInput(inputFilenamePath, trainOrTest):
    connectiveWordID = relation['Connective']['TokenList'][0][4];
    #print "Sentence Number: " + str(parseJSON_sentence_number);
    #print "Connective Word ID: " + str(connectiveWordID);
-   fileName = str(relation['DocID']);
-
+   fileName = str(relation['DocID']); 
+   relID = str(relation['ID']);
    #Parses.json object for that relation
    parseObject = en_parse_dict[relation_DocID]['sentences'][parseJSON_sentence_number];
    connectiveWordIDs = [];
@@ -386,13 +386,13 @@ def readInput(inputFilenamePath, trainOrTest):
     arg2TokenList = [];
     arg1STokenList = [];
     arg2STokenList = [];
-    bigDiction[bigDictionIndex] = (features, label, relation_DocID, parseJSON_sentence_number, connectiveWordIDs, strConnectiveWords, arg1TokenList, arg2TokenList, arg1STokenList, arg2STokenList);
+    bigDiction[bigDictionIndex] = (features, label, relation_DocID, parseJSON_sentence_number, connectiveWordIDs, strConnectiveWords, arg1TokenList, arg2TokenList, arg1STokenList, arg2STokenList, relID);
     #featForConn[(relation_DocID, parseJSON_sentence_number, connectiveWordIDs)] = features;
     featForConnTs[(relation_DocID, parseJSON_sentence_number, tuple(connectiveWordIDs))] = features;
     bigDictionIndex = bigDictionIndex + 1;
      
    if(trainOrTest == 'train'):
-    obigDiction[bigDictionIndex] = (features, label, relation_DocID, parseJSON_sentence_number, connectiveWordIDs, strConnectiveWords, arg1TokenList, arg2TokenList, arg1STokenList, arg2STokenList);
+    obigDiction[bigDictionIndex] = (features, label, relation_DocID, parseJSON_sentence_number, connectiveWordIDs, strConnectiveWords, arg1TokenList, arg2TokenList, arg1STokenList, arg2STokenList, relID);
     featForConnTr[(relation_DocID, parseJSON_sentence_number, tuple(connectiveWordIDs))] = features;
     bigDictionIndex = bigDictionIndex + 1;
     trainingSet.append((features, label));
