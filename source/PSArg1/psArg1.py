@@ -1,16 +1,18 @@
 #!/usr/bin/python
 from sys import argv,exit,stderr
+import os
 import json
 import codecs
 import func 
-
+#print >>stderr, argv[0]
 if len(argv)<4:
 	print """
 	./psArg1.py <relation.json> <parses.json> <writeF>
 	[resources/verbList.txt]
 	"""
 	exit()
-
+terms=argv[0].split('/')
+curDir='/'.join(terms[:-1])
 relationsFile=argv[1]
 parsesFile=argv[2]
 relationsF=codecs.open(relationsFile, encoding='utf8')
@@ -21,7 +23,8 @@ outF=open(argv[3],'w')
 parseDict=json.load(parsesF)
 relations = [json.loads(x) for x in relationsF]
 
-verbListF=open("PSArg1/resources/verbList.txt",'r')
+#verbListF=open("resources/verbList.txt",'r')
+verbListF=open(curDir+"/resources/verbList.txt",'r')
 verbList={}
 for l in verbListF:
 	terms=l.split()

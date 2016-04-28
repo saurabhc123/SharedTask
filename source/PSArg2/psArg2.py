@@ -21,7 +21,11 @@ outF=open(argv[3],'w')
 parseDict=json.load(parsesF)
 relations = [json.loads(x) for x in relationsF]
 
-verbListF=open("PSArg2/resources/verbList.txt",'r')
+terms=argv[0].split('/')
+curDir='/'.join(terms[:-1])
+
+#verbListF=open("resources/verbList.txt",'r')
+verbListF=open(curDir+"/resources/verbList.txt",'r')
 verbList={}
 for l in verbListF:
 	terms=l.split()
@@ -45,6 +49,8 @@ def makeDataForArg2PSExplicit(dictByDocID,dictByTokenID,parseDict,relationDict,v
 	   arg2TokenList=func.getTokenIDsList(relation,'Arg2')
 	  
 	   #take sentID of first token of arg1 as sentID of arg1
+	   print >>stderr, relation['Arg1']['TokenList']
+	   print >>stderr, 'relID', relID
 	   arg1SentID=relation['Arg1']['TokenList'][0][3]
 	   arg2SentID=relation['Arg2']['TokenList'][0][3]
 	   arg1Loc=func.getArg1Location(relation)
