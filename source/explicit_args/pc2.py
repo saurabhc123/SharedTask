@@ -234,7 +234,7 @@ def readInput(inputFilenamePath, inputParse, trainOrTest):
    #print "Sentence Number: " + str(parseJSON_sentence_number);
    #print "Connective Word ID: " + str(connectiveWordID);
    fileName = str(relation['DocID']);
-
+   relID = str(relation['ID']);
    #Parses.json object for that relation
    parseObject = en_parse_dict[relation_DocID]['sentences'][parseJSON_sentence_number];
    connectiveWordIDs = [];
@@ -391,13 +391,13 @@ def readInput(inputFilenamePath, inputParse, trainOrTest):
     arg2TokenList = [];
     arg1STokenList = [];
     arg2STokenList = [];
-    bigDiction[bigDictionIndex] = (features, label, relation_DocID, parseJSON_sentence_number, connectiveWordIDs, strConnectiveWords, arg1TokenList, arg2TokenList, arg1STokenList, arg2STokenList);
+    bigDiction[bigDictionIndex] = (features, label, relation_DocID, parseJSON_sentence_number, connectiveWordIDs, strConnectiveWords, arg1TokenList, arg2TokenList, arg1STokenList, arg2STokenList, relID);
     #featForConn[(relation_DocID, parseJSON_sentence_number, connectiveWordIDs)] = features;
     featForConnTs[(relation_DocID, parseJSON_sentence_number, tuple(connectiveWordIDs))] = features;
     bigDictionIndex = bigDictionIndex + 1;
      
    if(trainOrTest == 'train'):
-    obigDiction[bigDictionIndex] = (features, label, relation_DocID, parseJSON_sentence_number, connectiveWordIDs, strConnectiveWords, arg1TokenList, arg2TokenList, arg1STokenList, arg2STokenList);
+    obigDiction[bigDictionIndex] = (features, label, relation_DocID, parseJSON_sentence_number, connectiveWordIDs, strConnectiveWords, arg1TokenList, arg2TokenList, arg1STokenList, arg2STokenList, relID);
     featForConnTr[(relation_DocID, parseJSON_sentence_number, tuple(connectiveWordIDs))] = features;
     bigDictionIndex = bigDictionIndex + 1;
     trainingSet.append((features, label));
@@ -1129,13 +1129,14 @@ def mergeSS(constituents, predictedArray, conns_list, parse_dict):
   DocID = dictEntry[2];
   sent_index = dictEntry[3];
   conn_indices = dictEntry[4]; 
+  relID = dictEntry[10];
   #DocID, sent_index, conn_indices = conn
   if relation_dict.has_key(i):
    Arg1_list, Arg2_list = relation_dict[i]
    Arg1_list = merge_NT_Arg(Arg1_list, parse_dict, DocID, sent_index)
    Arg2_list = merge_NT_Arg(Arg2_list, parse_dict, DocID, sent_index)
    if Arg1_list != [] and Arg2_list != []:
-    temp.append((source, DocID, sent_index, conn_indices, Arg1_list, Arg2_list))
+    temp.append((source, DocID, sent_index, conn_indices, Arg1_list, Arg2_list, relID))
    else:
     #print "Filename For Zero: " + str(DocID);
     #print "Sent Index For Zero: " + str(sent_index);
@@ -1184,6 +1185,7 @@ def printToFile(relFile, outFile, temp, parse_dict, ps_array):
    sent_index = data[2];
    entryDict = str(docID);
    dictEntry['DocID'] = str(docID);
+   dictEntry['ID'] = str(data[6]);
    arg1 = get_doc_offset(parse_dict, docID, data[2],data[4]);
    arg1Final = [];
    elementI = 0
@@ -1249,6 +1251,7 @@ def printToFile(relFile, outFile, temp, parse_dict, ps_array):
    filename = ps_entry[2];
    #dictEntry['DocID'] = str(ps_entry[2]);
    sent_index = ps_entry[3];
+   relID = ps_entry[10];
    arg1DocIndex = [];
    arg2DocIndex = [];
    arg1SentIndex = [];
@@ -1279,6 +1282,7 @@ def printToFile(relFile, outFile, temp, parse_dict, ps_array):
     connFinal.append([0, 0, connI, sent_index, conn_indices[elementI]]);
     elementI = elementI + 1;
    dictEntry['DocID'] = str(filename);
+   dictEntry['ID'] = str(relID);
    dictEntry['Arg1'] = dict({"TokenList":arg1Final});
    dictEntry['Arg2'] = dict({"TokenList":arg2Final});
    dictEntry['Connective'] = dict({"TokenList":connFinal});
