@@ -13,7 +13,6 @@ import validator
 CONN_HEAD_MAPPER = ConnHeadMapper()
 
 def evaluate(gold_list, predicted_list):
-    print "In function: evaluate";
     connective_cm = evaluate_connectives(gold_list, predicted_list)
     arg1_cm, arg2_cm, rel_arg_cm = evaluate_argument_extractor(gold_list, predicted_list)
     sense_cm = evaluate_sense(gold_list, predicted_list)
@@ -31,18 +30,15 @@ def evaluate(gold_list, predicted_list):
 
 
 def evaluate_argument_extractor(gold_list, predicted_list):
-    print "In function: evaluate_argument_extractor";
     """Evaluate argument extractor at Arg1, Arg2, and relation level
 
     """
     gold_arg1 = [(x['DocID'], x['Arg1']['TokenList']) for x in gold_list]
     predicted_arg1 = [(x['DocID'], x['Arg1']['TokenList']) for x in predicted_list]
-    print "Arg 1 Comparison";
     arg1_cm = compute_binary_eval_metric(gold_arg1, predicted_arg1, span_exact_matching)
 
     gold_arg2 = [(x['DocID'], x['Arg2']['TokenList']) for x in gold_list]
     predicted_arg2 = [(x['DocID'], x['Arg2']['TokenList']) for x in predicted_list]
-    print "Arg 2 Comparison";
     arg2_cm = compute_binary_eval_metric(gold_arg2, predicted_arg2, span_exact_matching)
 
     gold_arg12 = [(x['DocID'], (x['Arg1']['TokenList'], x['Arg2']['TokenList'])) \
@@ -53,7 +49,6 @@ def evaluate_argument_extractor(gold_list, predicted_list):
     return arg1_cm, arg2_cm, rel_arg_cm
 
 def evaluate_connectives(gold_list, predicted_list):
-    print "In function: evaluate_connectives";
     """Evaluate connective recognition accuracy for explicit discourse relations
 
     """
@@ -66,7 +61,6 @@ def evaluate_connectives(gold_list, predicted_list):
     return connective_cm
 
 def spans_exact_matching(gold_doc_id_spans, predicted_doc_id_spans):
-    print "In function: spans_exact_matching";
     """Matching two lists of spans
 
     Input:
@@ -88,7 +82,6 @@ def spans_exact_matching(gold_doc_id_spans, predicted_doc_id_spans):
     return exact_match
 
 def span_exact_matching(gold_span, predicted_span):
-    print "In function: span_exact_matching";
     """Matching two spans
 
     Input:
@@ -102,14 +95,9 @@ def span_exact_matching(gold_span, predicted_span):
     predicted_docID = predicted_span[0]
     gold_token_indices = [x[2] for x in gold_span[1]]
     predicted_token_indices = predicted_span[1]
-
-    print "Gold Token: " + str(gold_token_indices);
-    print "Predicted Token: " + str(predicted_token_indices);  
-
     return gold_docID == predicted_docID and gold_token_indices == predicted_token_indices
 
 def connective_head_matching(gold_raw_connective, predicted_raw_connective):
-    print "In function: connective_head_matching";
     """Matching connectives
 
     Input:
@@ -144,7 +132,6 @@ def connective_head_matching(gold_raw_connective, predicted_raw_connective):
         return set(gold_head_connective_indices).issubset(set(predicted_token_list))
 
 def evaluate_sense(gold_list, predicted_list):
-    print "In function: evaluate_sense";
     """Evaluate sense classifier
 
     The label ConfusionMatrix.NEGATIVE_CLASS is for the relations 
@@ -188,7 +175,6 @@ def evaluate_sense(gold_list, predicted_list):
 
 
 def combine_spans(span1, span2):
-    print "In function: combine_spans";
     """Merge two text span dictionaries
 
     """
@@ -200,7 +186,6 @@ def combine_spans(span1, span2):
     return new_span
 
 def compute_binary_eval_metric(gold_list, predicted_list, matching_fn):
-    print "In function: compute_binary_eval_metric";
     """Compute binary evaluation metric
 
     """
@@ -227,7 +212,6 @@ def compute_binary_eval_metric(gold_list, predicted_list, matching_fn):
 
 
 def _link_gold_predicted(gold_list, predicted_list, matching_fn):
-    print "In function: _link_gold_predicted";
     """Link gold standard relations to the predicted relations
 
     A pair of relations are linked when the arg1 and the arg2 match exactly.
