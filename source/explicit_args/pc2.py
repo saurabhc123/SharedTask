@@ -539,21 +539,21 @@ def preprocessing(inputFilenamePath):
  en_parse_dict = json.load(parse_file)
  
  for filename, sentenceObject in en_parse_dict.iteritems():
-  sentenceNumber = 1;
+  sentenceNumber = 0;
   i = 0;
   for sentenceArray in en_parse_dict[filename]['sentences']:
    wordsInSentence = sentenceArray['words'];
    #i = 1;
    wordArray = [];
-   j = 1;
+   j = 0;
    k = 0;
    sentWordArray = []
    for word in wordsInSentence:
     rawWord = word[0];
-    if rawWord != ".":  
+    #if rawWord != ".":  
      #print "Word: " + str(word[0]) + " has id: " + str(i);
-     wordArray.append(i);
-     sentWordArray.append(k);
+    wordArray.append(i);
+    sentWordArray.append(k);
     allTokenDict[i] = rawWord;
     filenameSentenceSentToken[((filename, sentenceNumber, j))] = word[1]['PartOfSpeech'];
     sentToDocToken[(filename, sentenceNumber, j)] = i; 
@@ -1259,7 +1259,7 @@ def printToFile(relFile, outFile, temp, parse_dict, ps_array):
 
    arg2SentIndex = dictSentenceToken[(filename, sent_index)];
    arg2DocIndex = dictDocumentToken[(filename, sent_index)];
-   if sent_index-1 <> 0:
+   if sent_index-1 >= 0:
     arg1DocIndex = dictDocumentToken[(filename, sent_index-1)];
     arg1SentIndex = dictSentenceToken[(filename, sent_index-1)];
     #arg1DocIndex = dictDocumentToken[(filename, sent_index - 2)];
@@ -1275,7 +1275,7 @@ def printToFile(relFile, outFile, temp, parse_dict, ps_array):
    conn_indices = [];
    for e in ps_entry[4]:
     conn_indices.append(e+1);
-   conn_indices_final = get_doc_offset(parse_dict, filename, sent_index - 1, conn_indices);
+   conn_indices_final = get_doc_offset(parse_dict, filename, sent_index, conn_indices);
    connFinal = [];
    elementI = 0
    for connI in conn_indices_final:

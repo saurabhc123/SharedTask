@@ -365,8 +365,7 @@ def readInput(relationFilePath, parseFilePath, trainOrTest):
     print ("Done");
     
     counter = 0;
-    flag = 0;
-
+    print "Extracting features from Relations..."
     countOfExplicit = 0;
     multiWordConn = 0;
     for relation in relations:
@@ -389,7 +388,8 @@ def readInput(relationFilePath, parseFilePath, trainOrTest):
             if trainOrTest == 'test':
                 goldList.append(relation) 
             
-            print "Relation Number " + str(counter) + " has explicit connective with connective word being : '" + relation['Connective']['RawText'] + "'";
+            #print "Extracting features from Relation [" + str(counter) + "]..."
+            #print "Relation Number " + str(counter) + " has explicit connective with connective word being : '" + relation['Connective']['RawText'] + "'";
             relation_DocID = relation['DocID'];
             parseJSON_sentence_number_arg2 = relation['Arg2']['TokenList'][0][3];
             connectiveWordIDs = []
@@ -432,7 +432,11 @@ def readInput(relationFilePath, parseFilePath, trainOrTest):
             features['f04'] = prev_1
             
             #Feature 5: Next Word
-            next_1 = str(parseObjectArg2['words'][connectiveWordIDs[-1] + 1][0]);
+            nextWordID = connectiveWordIDs[-1] + 1
+            if nextWordID < len(parseObjectArg2['words']):
+                next_1 = str(parseObjectArg2['words'][nextWordID][0]);
+            else:
+                next_1 = ''
             features['f05'] = next_1
             
             #Feature 6: prev_1 + C
@@ -566,14 +570,7 @@ def readInput(relationFilePath, parseFilePath, trainOrTest):
             if len(preConnPOSs) > 0:
                 features['f29'] = preConnPOSs
             
-            
 #             instanceID = 'DocID-' + str(relation_DocID) + ':SentID-' + str(parseJSON_sentence_number_arg2) + ':RelID-' + str(counter)
-#             if flag >= 0 and flag < 20:
-#                 print "\nRelation[" + str(counter) + "]:"
-#                 print "Raw String: " + relation['Arg2']['RawText'];
-#                 print "Connective Words: " + strConnectiveWords;
-#                 print "Features: " + str(features);
-#                 flag += 1;
             
             if(trainOrTest == 'train'):
                 trainingSet.append((features, label));
@@ -837,3 +834,4 @@ if __name__ == '__main__':
     exportUpdatedRelations(LBJPredictionFile, updatedRelationsFile)
     
     print "Done";
+
