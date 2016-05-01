@@ -742,7 +742,7 @@ def extract_implicit_arguments(input_relations_file, input_parses_file, output_r
         input_parses_file:
         output_relations_file:
     """
-    argumentClassifierInstance = argumentClassifier.argumentClassifier(input_relations_file, input_parses_file);
+    argumentClassifierInstance = argumentClassifier(input_relations_file, input_parses_file);
     print "Loading the models for implicit arguments..." + (time.strftime("%I:%M:%S"))
     if not argumentClassifierInstance.do_models_exist():
         print "Pre-trained models for implicit arguments not found"
