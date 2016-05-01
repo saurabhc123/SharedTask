@@ -22,8 +22,10 @@ def writeOutputFormat(relations,outF):
 
 def relationToOutputFormat(relation,outF):
 	connectiveTokenIDs=func.getTokenIDsList(relation,'Connective')
-        arg1TokenIDs=func.getTokenIDsList(relation,'Arg1')
-        arg2TokenIDs=func.getTokenIDsList(relation,'Arg2')
+        if 'Arg1' in relation:
+		arg1TokenIDs=func.getTokenIDsList(relation,'Arg1')
+        if 'Arg2' in relation:
+		arg2TokenIDs=func.getTokenIDsList(relation,'Arg2')
 	if 'Connective' not in relation:
 		relation['Connective']={}
 	relation['Connective']['TokenList']=connectiveTokenIDs
