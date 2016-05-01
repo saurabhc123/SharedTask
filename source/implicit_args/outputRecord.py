@@ -20,7 +20,7 @@ class OutputRecord:
             entryDict['DocID'] = str(self.docId);
             entryDict['Arg1'] = dict({"TokenList":self.arg1TokenList});
             entryDict['Arg2'] = dict({"TokenList":self.arg2TokenList});
-            entryDict['Connective'] = dict({"TokenList":self.connective});
+            entryDict['Connective'] = self.connective;
             entryDict['Sense'] = self.sense;
             entryDict['Type'] = self.type;
             return entryDict;
@@ -30,7 +30,7 @@ class OutputRecord:
             entryDict['Arg1'] = dict({"CharacterSpanList": [], "RawText": arg1RawText, "TokenList":self.arg1TokenList});
             entryDict['Arg2'] = dict({"CharacterSpanList": [], "RawText": arg2RawText, "TokenList":self.arg2TokenList});
             entryDict['DocID'] = self.docId;
-            entryDict['Connective'] = dict({"TokenList":self.connective});
+            entryDict['Connective'] = self.connective;
             entryDict['ID'] = "ID";
             entryDict['Sense'] = self.sense;
             entryDict['Type'] = self.type;
