@@ -409,7 +409,7 @@ class argumentClassifier:
         f.close()
         return arg2Model
 
-    def performClassificationOnDebug(self, arg1Classifier, arg2Classifier, outputFilename):
+    def performClassificationOnTest1(self, arg1Classifier, arg2Classifier, outputFilename):
         correctArg1Predictions = 0;
         wrongArg1Predictions = 0;
         punctuation = "...,:;?!~--"
@@ -436,6 +436,7 @@ class argumentClassifier:
         for relation in relations:
             connectiveType = relation['Type'];
             connective = relation['Connective']
+            id = relation["ID"]
             if connectiveType != 'Implicit':
                 # continue;
                 relationSense = relation['Sense']
@@ -483,6 +484,13 @@ class argumentClassifier:
                                                      relation['Arg2']['TokenList']));
 
 
+                    if len(arg1WordList) == 0:
+                        arg1WordList = map(lambda word: word.actualWord, arg1Sentence.words)
+
+
+                    if len(arg2WordList) == 0:
+                        arg2WordList = map(lambda word: word.actualWord, arg2Sentence.words)
+
                     if arg1WordList:
                         if (arg1WordList[len(arg1WordList) - 1]) in punctuation:
                             arg1WordList.pop(-1);
@@ -491,12 +499,14 @@ class argumentClassifier:
                         if (arg2WordList[len(arg2WordList) - 1]) in punctuation:
                             arg2WordList.pop(-1);
 
+
+
                     matchFound = ''
 
                     with open(comparisonFileName, 'a+') as f:
                         try:
                             if len(arg1WordList) != len(relationArg1TokenList):
-                                matchFound = "Arg1 match not found"
+                                matchFound = "Arg1 match not found" , id
                                 json.dump(matchFound, f);
                                 f.write("\n");
                                 f.write(" ".join(arg1WordList));
@@ -509,7 +519,7 @@ class argumentClassifier:
                             if len(arg2WordList) == len(relationArg2TokenList):
                                 matchFound = "Arg2 match found"
                             else:
-                                matchFound = "Arg2 match not found"
+                                matchFound = "Arg2 match not found" , id
                                 json.dump(matchFound, f);
                                 f.write("\n");
                                 f.write(" ".join(arg2WordList));
@@ -573,8 +583,6 @@ class argumentClassifier:
             if connectiveType == 'Implicit':
                 arg1Sentence = parsedData.documents[relationDocId][arg1SentenceNumber];
                 arg2Sentence = parsedData.documents[relationDocId][arg2SentenceNumber];
-                relationArgument1 = relation['Arg1']['RawText'];
-                relationArgument2 = relation['Arg2']['RawText'];
 
                 if arg1SentenceNumber == arg2SentenceNumber:
                     f2 = 0;
@@ -595,15 +603,33 @@ class argumentClassifier:
                                 lambda tokenIndex: arg2Sentence.words[tokenIndex - arg2Sentence.startTokenIndex].actualWord,
                                 arg2TokenList)
 
+
+
+                    if len(arg1TokenList) == 0:
+                        arg1WordList = map(lambda word: word.actualWord, arg1Sentence.words)
+
+                    if len(arg2TokenList) == 0:
+                        arg2WordList = map(lambda word: word.actualWord, arg2Sentence.words)
+
                     if arg1WordList:
                         if (arg1WordList[len(arg1WordList) - 1]) in punctuation:
-                            arg1TokenList.pop(-1);
+                            arg1WordList.pop(-1);
+                            if len(arg1TokenList) != 0:
+                                arg1TokenList.pop(-1);
 
                     if arg2WordList:
                         if (arg2WordList[len(arg2WordList) - 1]) in punctuation:
-                            arg2TokenList.pop(-1);
+                            arg2WordList.pop(-1);
+                            if len(arg2TokenList) != 0:
+                                arg2TokenList.pop(-1);
 
+                    if len(arg1TokenList) == 0:
+                        for i in range(arg1Sentence.startTokenIndex , arg1Sentence.startTokenIndex + len(arg1WordList), 1):
+                            arg1TokenList.append(i);
 
+                    if len(arg2TokenList) == 0:
+                        for i in range(arg2Sentence.startTokenIndex , arg2Sentence.startTokenIndex + len(arg2WordList), 1):
+                            arg2TokenList.append(i);
 
                 arg1RelationsTokenList = []
                 arg2RelationsTokenList = []
