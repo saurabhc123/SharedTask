@@ -563,6 +563,7 @@ class argumentClassifier:
             arg1RawText = relation['Arg1']['RawText']
             arg2RawText = relation['Arg2']['RawText']
             connective = relation['Connective']
+            id = relation['ID']
             if connectiveType != 'Implicit':
                 arg1TokenList = list(
                     map(lambda tokenList: self.generateTokenListForOutput(tokenList), relation['Arg1']['TokenList']));
@@ -618,7 +619,7 @@ class argumentClassifier:
             with open(outputFilename, 'a+') as f:
                 output = outputRecord.OutputRecord.loadFromParameters(relationDocId, relationSense, connectiveType,
                                                                       connective, arg1RelationsTokenList,
-                                                                      arg2RelationsTokenList);
+                                                                      arg2RelationsTokenList, id);
                 formattedOutput = output.getFormattedOutputForRelations(arg1RawText,arg2RawText);
                 json.dump(formattedOutput, f, sort_keys=True);
                 f.write("\n");
