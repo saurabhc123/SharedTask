@@ -734,15 +734,22 @@ class argumentClassifier:
 
         print "Accuracy: ", accuracy;
 
-    def extract_implicit_arguments(self, input_relations_file, input_parses_file, output_relations_file):
-        argumentClassifierInstance = argumentClassifier.argumentClassifier(input_relations_file, input_parses_file);
-        print "Loading the models for implicit arguments..." + (time.strftime("%I:%M:%S"))
-        if not argumentClassifierInstance.do_models_exist():
-            print "Pre-trained models for implicit arguments not found"
-            exit();
-        else:
-            print "Pre-trained models for implicit arguments found..."
-        trainedArg1Model = argumentClassifierInstance.get_arg1_model()
-        trainedArg2Model = argumentClassifierInstance.get_arg2_model()
-        print "Making predictions now for implicit arguments..." + (time.strftime("%I:%M:%S"))
-        argumentClassifierInstance.performClassificationOnTest(trainedArg1Model, trainedArg2Model, output_relations_file)
+def extract_implicit_arguments(input_relations_file, input_parses_file, output_relations_file):
+    """
+
+    Args:
+        input_relations_file:
+        input_parses_file:
+        output_relations_file:
+    """
+    argumentClassifierInstance = argumentClassifier.argumentClassifier(input_relations_file, input_parses_file);
+    print "Loading the models for implicit arguments..." + (time.strftime("%I:%M:%S"))
+    if not argumentClassifierInstance.do_models_exist():
+        print "Pre-trained models for implicit arguments not found"
+        exit();
+    else:
+        print "Pre-trained models for implicit arguments found..."
+    trainedArg1Model = argumentClassifierInstance.get_arg1_model()
+    trainedArg2Model = argumentClassifierInstance.get_arg2_model()
+    print "Making predictions now for implicit arguments..." + (time.strftime("%I:%M:%S"))
+    argumentClassifierInstance.performClassificationOnTest(trainedArg1Model, trainedArg2Model, output_relations_file)
