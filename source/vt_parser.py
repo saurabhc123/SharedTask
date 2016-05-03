@@ -1,7 +1,7 @@
 
 import json
 import sys
-import explicitconnective.evaluate_connective_classifier_maxent
+import explicitconnective.evaluate_connective_classifier_maxent2
 import implicit_args.argumentClassifier
 import subprocess
 import os
@@ -23,7 +23,7 @@ class DiscourseParser(object):
 
     def run_connective_classifier(self, input_parses_file, output_path):
         output_relations_file = output_path + self.explicit_connective_output_file_name
-        explicitconnective.evaluate_connective_classifier_maxent.main(input_parses_file, output_relations_file)
+        explicitconnective.evaluate_connective_classifier_maxent2.main(input_parses_file, output_relations_file)
 
     def run_explicit_args_extractor(self,input_parses_file ,output_path):
         input_relations_file = output_path + self.explicit_connective_output_file_name
@@ -55,9 +55,9 @@ if __name__ == '__main__':
     input_parses_file = sys.argv[1]
     output_dir = sys.argv[2]
     parser = DiscourseParser()
-    #parser.run_connective_classifier(input_parses_file, output_dir)
+    parser.run_connective_classifier(input_parses_file, output_dir)
     #parser.run_explicit_args_extractor(input_parses_file, output_dir)
     #parser.run_ps_arg1_extractor(input_parses_file, output_dir)
     #parser.run_ps_arg2_extractor(input_parses_file, output_dir)
     #parser.run_explicit_sense_classifier(input_parses_file, output_dir)
-    parser.run_implicit_args_extractor(input_parses_file, output_dir)
+    #parser.run_implicit_args_extractor(input_parses_file, output_dir)
