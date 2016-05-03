@@ -1274,7 +1274,7 @@ def printToFile(relFile, outFile, temp, parse_dict, ps_array):
 
    conn_indices = [];
    for e in ps_entry[4]:
-    conn_indices.append(e+1);
+    conn_indices.append(e);
    conn_indices_final = get_doc_offset(parse_dict, filename, sent_index, conn_indices);
    connFinal = [];
    elementI = 0
