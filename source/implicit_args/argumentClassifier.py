@@ -644,8 +644,14 @@ class argumentClassifier:
                 arg2RelationsTokenList = []
 
                 for argToken in arg1TokenList:
+                    if argToken - arg1Sentence.startTokenIndex < 0:
+                        print "Non subsequent implicit sentences found -> Arg1"
+                        continue
                     arg1RelationsTokenList.append([0, 0, argToken, arg1SentenceNumber, argToken - arg1Sentence.startTokenIndex]);
                 for argToken in arg2TokenList:
+                    if argToken - arg2Sentence.startTokenIndex < 0:
+                        print "Non subsequent implicit sentences found -> Arg2"
+                        continue
                     arg2RelationsTokenList.append([0, 0, argToken, arg2SentenceNumber, argToken - arg2Sentence.startTokenIndex]);
 
                 arg1RawText = "".join([('' if word in punctuation else ' ')+word for word in arg1WordList])
