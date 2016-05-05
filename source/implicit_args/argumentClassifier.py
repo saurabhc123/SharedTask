@@ -639,6 +639,11 @@ class argumentClassifier:
                     if len(arg2TokenList) == 0:
                         for i in range(arg2Sentence.startTokenIndex , arg2Sentence.startTokenIndex + len(arg2WordList), 1):
                             arg2TokenList.append(i);
+                else:
+                    arg1TokenList = list(map(lambda tokenList: self.generateTokenListForOutput(tokenList),
+                                             relation['Arg1']['TokenList']));
+                    arg2TokenList = list(map(lambda tokenList: self.generateTokenListForOutput(tokenList),
+                                             relation['Arg2']['TokenList']));
 
                 arg1RelationsTokenList = []
                 arg2RelationsTokenList = []
@@ -651,6 +656,7 @@ class argumentClassifier:
                 for argToken in arg2TokenList:
                     if argToken - arg2Sentence.startTokenIndex < 0:
                         print "Non subsequent implicit sentences found -> Arg2"
+                        print "Difference = ", arg2SentenceNumber - arg1SentenceNumber
                         continue
                     arg2RelationsTokenList.append([0, 0, argToken, arg2SentenceNumber, argToken - arg2Sentence.startTokenIndex]);
 
