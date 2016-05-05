@@ -19,6 +19,7 @@ from model_trainer.NT_arg_extractor.feature_functions \
 from example import Example
 import util
 import argparse
+import pickle
 
 def _get_constituents(parse_dict, connective):
     DocID = connective.DocID
@@ -26,6 +27,7 @@ def _get_constituents(parse_dict, connective):
     parse_tree = parse_dict[DocID]["sentences"][sent_index]["parsetree"].strip()
     syntax_tree = Syntax_tree(parse_tree)
     if syntax_tree.tree == None:
+        print "No Syntax Tree";
         return []
 
     conn_indices = connective.token_indices
@@ -52,10 +54,12 @@ def _get_constituents(parse_dict, connective):
         cons = Constituent(syntax_tree, node)
         cons.connective = connective
         constituents.append(cons)
+    if len(constituents) == 0:
+     print "Number of Constituents is 0";
     return constituents
 
 #observedArray = [];
-def test_maxent(algorithms, train, test, flag):
+def test_maxent(algorithms, train, test, flag, modelFileName):
      observedArray = [];
      '''
      train = [
@@ -77,11 +81,19 @@ def test_maxent(algorithms, train, test, flag):
      ]
      '''
      classifiers = {}
-     algorithm = 'IIS'
+     algorithm = 'GIS'
      p = 0.0;
      r = 0.0;
      f = 0.0;
-     classifiers[algorithm] = nltk.MaxentClassifier.train(train, algorithm, trace=0, max_iter=5)
+     #classifiers[algorithm] = nltk.MaxentClassifier.train(train, algorithm, trace=0, max_iter=5)
+     if os.path.isfile(modelFileName):
+      print "Model Exists";
+      with open(modelFileName, "r") as filename:
+       arg1Model = pickle.load(filename)
+       classifiers['IIS'] = arg1Model;
+     else:
+      print "No Model Exists";
+      classifiers[algorithm] = nltk.MaxentClassifier.train(train, algorithm, trace=0, max_iter=5)
      for algorithm, classifier in classifiers.items():
          refsets = collections.defaultdict(set)
          testsets = collections.defaultdict(set)
@@ -120,6 +132,7 @@ def current_to_root(index, ptree):
 	return label
 
 trainingSet = [];
+trSet = [];
 testSet = [];
 testSetLabels = [];
 bigDiction = dict();
@@ -171,6 +184,7 @@ def makeDictByDocID(parseDict):
    sentenceID+=1
  return dictByDocID
 
+relToConn = dict();
 def readInput(inputFilenamePath, inputParse, trainOrTest):
  featForConn = dict();
  #Read relations.json
@@ -235,6 +249,8 @@ def readInput(inputFilenamePath, inputParse, trainOrTest):
    #print "Connective Word ID: " + str(connectiveWordID);
    fileName = str(relation['DocID']);
    relID = str(relation['ID']);
+   #if trainOrTest == 'test':
+   # relToConn[relID] = connectiveWordID;
    #Parses.json object for that relation
    parseObject = en_parse_dict[relation_DocID]['sentences'][parseJSON_sentence_number];
    connectiveWordIDs = [];
@@ -242,7 +258,9 @@ def readInput(inputFilenamePath, inputParse, trainOrTest):
    #print "Number of Connectives: " + str(len(relation['Connective']['TokenList']));
    for i in range(len(relation['Connective']['TokenList'])):
     connectiveWordIDs.append(relation['Connective']['TokenList'][i][4]);
-  
+ 
+   if trainOrTest == 'test':
+    relToConn[relID] = connectiveWordIDs; 
    
    #print "Connective Words: " + str(connectiveWordIDs); 
    connectiveWords = []
@@ -383,7 +401,31 @@ def readInput(inputFilenamePath, inputParse, trainOrTest):
    
    features['f14'] = crp;
    #features.append(crp);
+   '''
+   #Feature 15: next_1 string
+   next_1 = '';
+   if connectiveWordID <= len(parseObject['words'])-2:
+    next_1 = str(parseObject['words'][connectiveWordID + 1][0]); 
+   features['f15'] = next_1;  
 
+   #Feature 16: next_1_POS
+   features['f16'] = next_1_POS;
+
+   #Feature 17: next_1 + C
+   features['f17'] = next_1 + "_" + strConnectiveWords;
+   
+   #Feature 18: next_2_POS
+   next_2_POS = '';
+   if connectiveWordID <= len(parseObject['words'])-3:
+     next_2_POS = str(parseObject['words'][connectiveWordID + 2][1]['PartOfSpeech']);
+   features['f18'] = next_2_POS;
+
+   #Feature 19: next_2 + C
+   features['f19'] = next_2 + "_" + strConnectiveWords;
+
+   #Feature 20: next_2_POS + C_POS
+   features['f20'] = next_2_POS + "_" + ' '.join(connectivePOSs);
+   '''
    #featForConn[(relation_DocID, parseJSON_sentence_number, tuple(connectiveWordIDs))] = features;
 
    if(trainOrTest == 'test'):
@@ -567,6 +609,8 @@ def preprocessing(inputFilenamePath):
  
  #print "Dictionary: " + str(allTokenDict); 
 
+psRelations = []
+ssRelations = []
 def splitSSandPS(inputFilenamePath, trainOrTest, observedArray):
  if trainOrTest == "train":
   parse_file = codecs.open(inputFilenamePath+'/parses.json', encoding='utf8');
@@ -588,9 +632,11 @@ def splitSSandPS(inputFilenamePath, trainOrTest, observedArray):
   if prediction == 'PS':
    #ps_array.append(bigDiction[i]);
    ps_array.append(currDict[i]);
+   psRelations.append(currDict[i][10]);
   elif prediction == 'SS':
    #ss_array.append(bigDiction[i]);
    ss_array.append(currDict[i]);
+   ssRelations.append(currDict[i][10]);
   i = i + 1;
    
  print "Size of Entire Dictionary: " + str(len(bigDiction));
@@ -614,14 +660,35 @@ def splitSSandPS(inputFilenamePath, trainOrTest, observedArray):
   i = 0;
   for prediction in observedArray:
    if prediction == 'PS':
-    ps_array.append(bigDiction[i]);
+    if bigDiction[i][3] == 0:
+     ss_array.append(bigDiction[i]);
+     ssRelations.append(bigDiction[i][10]); 
+    else:
+     ps_array.append(bigDiction[i]);
+     psRelations.append(bigDiction[i][10]);
    elif prediction == 'SS':
     ss_array.append(bigDiction[i]);
+    ssRelations.append(bigDiction[i][10]);
    i = i + 1;
- 
+ '''
+ with open('ssRelation.txt', 'w') as p:
+  for value in sorted(ssRelations):
+   p.write("Relation: " + str(value));
+   p.write("\n");
+
+ with open('psRelation.txt', 'w') as p:
+  for value in sorted(psRelations):
+   p.write("Relation: " + str(value));
+   p.write("\n");
+ '''
+ print "Size of OA: " + str(len(observedArray));
+ print "Size of PS Dictionary: " + str(len(ps_array));
+ print "Size of SS Dictionary: " + str(len(ss_array)); 
  return ss_array, ps_array, en_parse_dict, dictByDocID;
 
 import model_trainer.NT_arg_extractor.NT_dict_util as dict_util;
+allRelationIDs = [];
+paraRelIDs = []
 def SS_parallel_not_parallel(inFile, trainOrTest, oa):
  ss_array, ps_array, parse_dict, dictByDocID = splitSSandPS(inFile, trainOrTest, oa);
  SS_conns_parallel_list = [];
@@ -635,6 +702,8 @@ def SS_parallel_not_parallel(inFile, trainOrTest, oa):
      parallel = True
   if parallel:
    SS_conns_parallel_list.append(dictEntry);
+   if trainOrTest == 'test':
+    paraRelIDs.append(dictEntry[10]);
   else:
    SS_conns_not_parallel_list.append(dictEntry);
 
@@ -642,15 +711,20 @@ def SS_parallel_not_parallel(inFile, trainOrTest, oa):
  #Convert into connectives
  connectives = [];
  i = 0;
+ cnrel = [];
  for dictEntry in SS_conns_not_parallel_list:
   connective = Connective(dictEntry[2], dictEntry[3], dictEntry[4], dictEntry[5]);
-  connective.relation_ID = i;
+  connective.relation_ID = dictEntry[10];
+  if trainOrTest == 'test':
+   allRelationIDs.append(dictEntry[10]);
+   cnrel.append(dictEntry[10]);
   if trainOrTest == 'train':
    connective.Arg1_token_indices = dictEntry[8];
    connective.Arg2_token_indices = dictEntry[9];
   i = i + 1;
   connectives.append(connective);
-
+ print "conn rel: " + str(len(cnrel));
+ print "distinct conn rel: " + str(len(set(cnrel))); 
  to_file = '/home/development/code/explicit_args/constituent_feature.txt'
  trSet = [];
  tSet = [];
@@ -674,8 +748,10 @@ def SS_parallel_not_parallel(inFile, trainOrTest, oa):
   # extract features for each constituent
   example_list = [];
   i = 0;
-   
+  
+  consrel = []; 
   for i, constituent in enumerate(constituents):
+   consrel.append(constituent.connective.relation_ID);
    totalConst.append(constituent);
    feature = dict();
    label = "null";
@@ -705,6 +781,84 @@ def SS_parallel_not_parallel(inFile, trainOrTest, oa):
    DocID = connective.DocID
    sent_index = connective.sent_index
    conn_node = dict_util.get_conn_node(syntax_tree, conn_indices)
+   
+   CON_POS = "";
+   CON_POS = dict_util.get_CON_POS(parse_dict, DocID, sent_index, conn_indices)
+   feature['f0'] = CON_POS
+   #print "f0: ", feature['f0']
+   NT_prev_curr_Path = "";
+   NT_prev_curr_Path = dict_util.get_NT_prev_curr_Path(i, constituents)
+   feature['f1'] = NT_prev_curr_Path
+   #print "f1: ", feature['f1']
+   CParent_to_root_path = "";
+   CParent_to_root_path = dict_util.get_CParent_to_root_path(parse_dict, DocID, sent_index, conn_indices)
+   feature['f2'] = CParent_to_root_path
+   #print "f2: ", feature['f2']
+   self_category = "";
+   self_category = dict_util.get_self_category(parse_dict, DocID, sent_index, conn_indices)
+   feature['f3'] = self_category
+   #print "f3: ", feature['f3']
+   CParent_to_root_path_node_names = "";
+   CParent_to_root_path_node_names = dict_util.get_CParent_to_root_path_node_names(parse_dict, DocID, sent_index, conn_indices)
+   feature['f4'] = str(CParent_to_root_path_node_names)  
+   #print "f4: ", feature['f4']
+   left_sibling_category = ""
+   left_sibling_category = dict_util.get_left_sibling_category(parse_dict, DocID, sent_index, conn_indices)
+   feature['f5'] = left_sibling_category
+   #print "f5: ", feature['f5']
+   NT_to_root_path = ""
+   NT_to_root_path = dict_util.get_NT_to_root_path(constituent)
+   feature['f6'] = NT_to_root_path
+   #print "f6: ", feature['f6']
+   conn_parent_categoryCtx = ""
+   conn_parent_categoryCtx = dict_util.get_conn_parent_categoryCtx(parse_dict, DocID, sent_index, conn_indices)
+   feature['f7'] = conn_parent_categoryCtx
+   #print "f7: ", feature['f7']
+   parent_category = ""
+   parent_category = dict_util.get_parent_category(parse_dict, DocID, sent_index, conn_indices)
+   feature['f8'] = parent_category
+   #print "f8: ", feature['f8']
+   conn_rightSiblingCtx = ""
+   conn_rightSiblingCtx = dict_util.get_conn_rightSiblingCtx(parse_dict, DocID, sent_index, conn_indices)
+   feature['f9'] = conn_rightSiblingCtx
+   #print "f9: ", feature['f9']
+   CON_Str = ""
+   CON_Str = dict_util.get_CON_Str(parse_dict, DocID, sent_index, conn_indices)
+   feature['f10'] = CON_Str
+   #print "f10: ", feature['f10']
+   CON_LStr = ""
+   CON_LStr = CON_Str.lower()
+   feature['f11'] = CON_LStr
+   #print "f11: ", feature['f11']
+   CON_Cat = "";
+   if conn_category.has_key(connective.name):
+    CON_Cat = conn_category[connective.name]
+   feature['f12'] = CON_Cat;
+   #print "f12: ", feature['f12']
+   CON_iRSib = ""
+   CON_iRSib = dict_util.get_CON_iRSib(syntax_tree,conn_node)
+   feature['f13'] = CON_iRSib
+   #print "f13: ", feature['f13']
+   NT_Ctx = ""
+   NT_Ctx = dict_util.get_NT_Ctx(constituent)
+   feature['f14'] = NT_Ctx
+   #print "f14: ", feature['f14']
+   CON_NT_Path = ""
+   CON_NT_Path = dict_util.get_CON_NT_Path(conn_node, constituent)
+   feature['f15'] = CON_NT_Path
+   #print "f15: ", feature['f15']
+   CON_NT_Path_iLsib = CON_iLSib = dict_util.get_CON_iLSib(syntax_tree,conn_node)
+   if CON_iLSib > 1:
+    CON_NT_Path_iLsib = CON_NT_Path + ":>1"
+   else:
+    CON_NT_Path_iLsib = CON_NT_Path + ":<=1"
+   feature['f16'] = CON_NT_Path_iLsib
+   #print "f16: ", feature['f16']
+   '''
+   CON_Cat = "";
+   if conn_category.has_key(connective.name):
+    CON_Cat = conn_category[connective.name]
+   feature['f0'] = CON_Cat;
 
    CON_Str = dict_util.get_CON_Str(parse_dict, DocID, sent_index, conn_indices)
    feature['f1'] = CON_Str;
@@ -726,7 +880,13 @@ def SS_parallel_not_parallel(inFile, trainOrTest, oa):
    CON_NT_Path = dict_util.get_CON_NT_Path(conn_node, constituent)
    feature['f6'] = CON_NT_Path;
    #print "CON_NT_Path: " + str(CON_NT_Path);
-   CON_NT_Position = dict_util.get_CON_NT_Position(conn_node, constituent)
+   #CON_NT_Position = dict_util.get_CON_NT_Position(conn_node, constituent)
+   CON_NT_Position = "neither";
+   constIndices = set(constituent.get_indices());
+   if max(constIndices) < conn_indices[0]:
+    CON_NT_Position = "left";
+   if min(constIndices) > conn_indices[-1]:
+    CON_NT_Position = "right"; 
    feature['f7'] = CON_NT_Position;
    #print "CON_NT_POSITION: " + str(CON_NT_Position);
    if conn_category.has_key(CON_LStr):
@@ -740,7 +900,45 @@ def SS_parallel_not_parallel(inFile, trainOrTest, oa):
    else:
     CON_NT_Path_iLsib = CON_NT_Path + ":<=1"
    feature['f8'] = CON_NT_Path_iLsib;
-   
+   '''
+   ''' 
+   feature['f10']  = dictByDocID[DocID][sent_index][constituent.get_indices()[0]]['pos']
+   feature['f11']  = dictByDocID[DocID][sent_index][constituent.get_indices()[-1]]['pos']
+   feature['f12']  = 'NA';
+
+   if i <> 0:
+    prevConstituent = constituents[i-1];
+    prevDoc = prevConstituent.connective.DocID;
+    prevSI = prevConstituent.connective.sent_index;
+    feature['f12'] = dictByDocID[prevDoc][prevSI][constituent.get_indices()[-1]]['pos'];
+
+   feature['f13'] = 'NA';
+   if i <> len(constituents)-1:
+    nextConstituent = constituents[i+1];
+    nextDoc = nextConstituent.connective.DocID;
+    nextSI = nextConstituent.connective.sent_index;
+    feature['f13'] = dictByDocID[nextDoc][nextSI][constituent.get_indices()[0]]['pos'];
+  
+   feature['f14'] = 'NA';
+   feature['f14'] = dictByDocID[DocID][sent_index][constituent.get_indices()[0]]['word'];
+   feature['f15'] = 'NA';
+   if i <> 0:
+    prevConstituent = constituents[i-1];
+    prevDoc = prevConstituent.connective.DocID;
+    prevSI = prevConstituent.connective.sent_index;
+    feature['f15'] = dictByDocID[prevDoc][prevSI][constituent.get_indices()[-1]]['word'];
+ 
+   feature['16'] = feature['f15'] + "_" + feature['f14'];
+   feature['f17'] = 'NA';
+   lastCurr = dictByDocID[DocID][sent_index][constituent.get_indices()[-1]]['word'];
+   if i <> len(constituents)-1:
+    nextConstituent = constituents[i+1];
+    nextDoc = nextConstituent.connective.DocID;
+    nextSI = nextConstituent.connective.sent_index;
+    feature['f17'] = dictByDocID[nextDoc][nextSI][constituent.get_indices()[0]]['word'];
+
+   feature['17'] = lastCurr + "_" + feature['f17'];
+   '''
    '''  
    if trainOrTest == 'train': 
     feats = featForConnTr[(DocID, sent_index, tuple(conn_indices))];
@@ -791,6 +989,9 @@ def SS_parallel_not_parallel(inFile, trainOrTest, oa):
     trSet.append((feature, label));
    else:
     tSet.append((feature, label));
+ 
+ print "constituent rel: " + str(len(consrel));
+ print "constituent unique rel: " + str(len(set(consrel)));
 
  if(trainOrTest == 'train'):
   return totalConst, trSet, SS_conns_parallel_list, SS_conns_not_parallel_list, parse_dict, ps_array;
@@ -1094,76 +1295,148 @@ def merge_NT_Arg(Arg_list, parse_dict, DocID, sent_index):
 
     return Arg
 
+mergeSSrelations = [];
+#notInRelationCount = 0;
+#inRelationCount = 0;
+nullArgs = [];
 def mergeSS(constituents, predictedArray, conns_list, parse_dict):
- 
- relation_dict = {};
+ notInRelationCount = 0;
+ inRelationCount = 0;
+ print "Size of Conns_list: " + str(len(conns_list));
+ cl = [];
+ for cl_entry in conns_list:
+  cl.append(cl_entry[10]);
+ print "Number of Conn Relations: " + str(len(cl));
+ print "Number of Distinct Conn Relations: " + str(len(set(cl)));
+ #print "Size of Conns_list: " + str(len(set(conns_list.keys()))); 
+ #relation_dict = {};
+ relation_dict = dict();
  for constituent, predicted in zip(constituents, predictedArray):
   relation_ID = constituent.connective.relation_ID;
+  mergeSSrelations.append(relation_ID);
   constituent_indices = constituent.indices;
+  if relation_dict.has_key(relation_ID):
+   currArray = relation_dict[relation_ID];
+   relation_dict[relation_ID].extend([(constituent_indices, predicted)]);
+   inRelationCount = inRelationCount + 1;
+  else:
+   relation_dict[relation_ID] = [(constituent_indices, predicted)]
+   notInRelationCount = notInRelationCount + 1;
+  '''
   if relation_ID not in relation_dict:
    relation_dict[relation_ID] = [(constituent_indices, predicted)]
+   notInRelationCount = notInRelationCount + 1;
   else:
    relation_dict[relation_ID].append((constituent_indices, predicted))
-
- #print "Relation Dict: " + str(len(relation_dict));
+   inRelationCount = inRelationCount + 1;
+  '''
+ print "Number of SS Relations: " + str(len(mergeSSrelations));
+ print "Number of Unique SS Relations: " + str(len(set(mergeSSrelations))); 
+ print "NotInRelationCount: " + str(notInRelationCount);
+ print "InRelationCount: " + str(inRelationCount);
+ print "Size of Relation Dict: " + str(len(relation_dict));
  for relation_ID in relation_dict.keys():
   list = relation_dict[relation_ID]
   Arg1_list = []
   Arg2_list = []
+  #null_list = []
   for span, label in list:
    if label == "arg1":
     Arg1_list.extend(span)
    if label == "arg2":
     Arg2_list.extend(span)
+   #if label == "null":
+   # null_list.extend(span)
 
   Arg1_list = sorted([int(item) for item in Arg1_list])
   Arg2_list = sorted([int(item) for item in Arg2_list])
+  #null_list = sorted([int(item) for item in null_list])
   relation_dict[relation_ID] = (Arg1_list, Arg2_list)
-
+ 
+ print "Size of Relation Dict After Creating Arg List: " + str(len(relation_dict));
  temp = []
  source = "SS"
  index = 0;
  print "Conns_list: " + str(len(conns_list));
  countZ = 0;
+ countNotZ = 0;
+ relIDZ = [];
+ relNonKey = [];
  for i, dictEntry in enumerate(conns_list):
   DocID = dictEntry[2];
   sent_index = dictEntry[3];
   conn_indices = dictEntry[4]; 
   relID = dictEntry[10];
   #DocID, sent_index, conn_indices = conn
-  if relation_dict.has_key(i):
-   Arg1_list, Arg2_list = relation_dict[i]
+  if relation_dict.has_key(relID):
+   Arg1_list, Arg2_list = relation_dict[relID]
    Arg1_list = merge_NT_Arg(Arg1_list, parse_dict, DocID, sent_index)
    Arg2_list = merge_NT_Arg(Arg2_list, parse_dict, DocID, sent_index)
+   #null_list = merge_NT_Arg(null_list, parse_dict, DocID, sent_index)
    if Arg1_list != [] and Arg2_list != []:
+    countNotZ = countNotZ + 1;
     temp.append((source, DocID, sent_index, conn_indices, Arg1_list, Arg2_list, relID))
    else:
     #print "Filename For Zero: " + str(DocID);
     #print "Sent Index For Zero: " + str(sent_index);
     #print "Conn Index For Zero: " + str(conn_indices);
     #print "Word List: " + str(dictSentenceToken[(DocID, sent_index)]);
+    #countZ = countZ + 1;
     '''
+    relIDZ.append(relID);
+   
     countZ = countZ + 1;
+    
     arg1TokenList = [];
     arg2TokenList = [];
     wordList = dictSentenceToken[(DocID, sent_index)];
     for index, value in enumerate(wordList):
      if value < conn_indices[0]:
       arg1TokenList.append(value);
-     elif value > conn_indices[len(conn_indices)-1]:
+     elif value > conn_indices[-1]:
       arg2TokenList.append(value);
-    temp.append((source, DocID, sent_index, conn_indices, Arg1_list, Arg2_list))
+    #temp.append((source, DocID, sent_index, conn_indices, Arg1_list, Arg2_list, relID))
+    print "Conn Indices: " + str(conn_indices)
     print "Zero Arg1: " + str(arg1TokenList);
     print "Zero Arg2: " + str(arg2TokenList);
+
+    #if len(arg1TokenList) != 0 or len(arg2TokenList) != 0:
+    # print "Add to temp";
+    # temp.append((source, DocID, sent_index, conn_indices, arg1TokenList, arg2TokenList, relID));
+    if arg1TokenList != [] and arg2TokenList != []:
+     temp.append((source, DocID, sent_index, conn_indices, arg1TokenList, arg2TokenList, relID));
+     print "Add to temp";
+    else:
+     print "Don't add to temp";
     '''
+    '''
+    arg1Null = [];
+    arg2Null = [];
+    for nullE in null_list:
+     if nullE < conn_indices[0]:
+      arg1Null.append(nullE);
+     elif nullE > conn_indices[-1]:
+      arg2Null.append(nullE);
+    '''
+    #print "Arg 1 Null: " + str(arg1Null);
+    #print "Arg 2 Null: " + str(arg2Null);
+    #temp.append((source, DocID, sent_index, conn_indices, arg1Null, arg2Null));
+    #nullArgs.append((DocID, relID, sent_index, conn_indices));
     pass;
+  else:
+   relNonKey.append(relID);
   index = index + 1;
  print "Count Z: " + str(countZ);
+ print "Count Not Z: " + str(countNotZ);
+ print "Size of temp: " + str(len(temp));
+ print "RelID Z: " + str(sorted(relIDZ));
+ print "RelNonKey: " + str(sorted(relNonKey));
+ print "Size of Non Key: " + str(len(relNonKey));
  return temp
 
 def get_doc_offset(parse_dict, DocID, sent_index, list):
     offset = 0
-    print "Sent Index: " + str(sent_index);
+    #print "Sent Index: " + str(sent_index);
     for i in range(sent_index):
         #print "i: " + str(i);
         #print "Number of Sentences: " + str(len(parse_dict[DocID]["sentences"]));
@@ -1174,10 +1447,12 @@ def get_doc_offset(parse_dict, DocID, sent_index, list):
         temp.append(item + offset)
     return temp
 
+relToConn2 = dict();
 def printToFile(relFile, outFile, temp, parse_dict, ps_array):
  index = 0;
  
  with open(relFile, 'w') as f:
+  print "Size of SS Entries: " + str(len(temp));
   for data in temp:
    dictEntry = dict();
    relID = index;
@@ -1210,6 +1485,7 @@ def printToFile(relFile, outFile, temp, parse_dict, ps_array):
    dictEntry['Sense'] = ["Expansion.Conjunction"];
    dictEntry['Type'] = 'Explicit';
    dictEntry['Arg1Pos'] = 'SS';
+   relToConn2[str(data[6])] = data[3];
    json.dump(dictEntry, f)
    f.write("\n");
  ''' 
@@ -1220,7 +1496,7 @@ def printToFile(relFile, outFile, temp, parse_dict, ps_array):
    t.write(str(conn_indices));
    t.write("\n");
  '''
- '''
+ ''' 
  with open(outFile, 'w') as f:
   index = 0;
   for data in temp:
@@ -1234,18 +1510,78 @@ def printToFile(relFile, outFile, temp, parse_dict, ps_array):
    dictEntry['Arg1'] = dict({"TokenList":arg1}); 
    arg2 = get_doc_offset(parse_dict, docID, data[2],data[5]);
    dictEntry['Arg2'] = dict({"TokenList":arg2});
-   conn_indices = get_doc_offset(parse_dict, docID, data[2],data[3]);
+   conn_indices = []
+   for h in data[3]:
+    conn_indices.append(sentToDocToken[(docID, data[2], h)]);
+   #conn_indices = get_doc_offset(parse_dict, docID, data[2],data[3]);
+   #print "Conn SentToDocToken: " + str(conn_indices);
    dictEntry['Connective'] = dict({"TokenList":conn_indices});
    dictEntry['Sense'] = ["Expansion.Conjunction"];
    dictEntry['Type'] = 'Explicit';
    #dictEntry['Arg1Pos'] = 'SS'; 
+   conn_indices = get_doc_offset(parse_dict, docID, data[2],data[3]);
+   #print "Conn From Offset: " + str(conn_indices);
    json.dump(dictEntry, f)
    f.write("\n");
+ 
+ with open(outFile, 'a') as f:
+  index = 0;
+  for ps_entry in ps_array:
+   dictEntry = dict();
+   filename = ps_entry[2];
+   #dictEntry['DocID'] = str(ps_entry[2]);
+   sent_index = ps_entry[3];
+   relID = ps_entry[10];
+   arg1DocIndex = [];
+   arg2DocIndex = [];
+   arg1SentIndex = [];
+   arg2SentIndex = [];
 
- print "Dict Sentence: " + str(dictSentenceToken);
- print "Dict Document: " + str(dictDocumentToken);
- '''
+   arg2SentIndex = dictSentenceToken[(filename, sent_index)];
+   arg2DocIndex = dictDocumentToken[(filename, sent_index)];
+   if sent_index-1 >= 0:
+    arg1DocIndex = dictDocumentToken[(filename, sent_index-1)];
+    arg1SentIndex = dictSentenceToken[(filename, sent_index-1)];
+    #arg1DocIndex = dictDocumentToken[(filename, sent_index - 2)];
+
+   arg1Final = [];
+   for x,y in zip(arg1SentIndex, arg1DocIndex):
+    arg1Final.append([0, 0, y, sent_index - 1, x]);
+
+   arg2Final = [];
+   for a,b in zip(arg2SentIndex, arg2DocIndex):
+    arg2Final.append([0, 0, b, sent_index, a]);
+
+   conn_indices = [];
+   for e in ps_entry[4]:
+    conn_indices.append(e);
+   conn_indices_final = get_doc_offset(parse_dict, filename, sent_index, conn_indices);
+   connFinal = [];
+   elementI = 0
+   for connI in conn_indices_final:
+    connFinal.append([0, 0, connI, sent_index, conn_indices[elementI]]);
+    elementI = elementI + 1;
+   dictEntry['DocID'] = str(filename);
+   dictEntry['ID'] = str(relID);
+   dictEntry['Arg1'] = dict({"TokenList":arg1DocIndex});
+   dictEntry['Arg2'] = dict({"TokenList":arg2DocIndex});
+   dictEntry['Connective'] = dict({"TokenList":conn_indices_final});
+   #dictEntry['Connective'] = dict({"TokenList":conn_indices});
+   dictEntry['Sense'] = ["Expansion.Conjunction"];
+   dictEntry['Type'] = 'Explicit';
+   dictEntry['Arg1Pos'] = 'PS';
+
+   #print "Relation Value for Conn For Rel: " + str(relID) + " with value: " + str(relToConn[relID]);
+   #print "Value I'm printing: " + str(conn_indices);
+
+   json.dump(dictEntry, f)
+   f.write("\n");
+   '''
+ #print "Dict Sentence: " + str(dictSentenceToken);
+ #print "Dict Document: " + str(dictDocumentToken);
+   
  with open(relFile, 'a') as p:
+  print "Size of PS Entries: " + str(len(ps_array));
   for ps_entry in ps_array:
    dictEntry = dict();
    filename = ps_entry[2];
@@ -1290,6 +1626,7 @@ def printToFile(relFile, outFile, temp, parse_dict, ps_array):
    dictEntry['Sense'] = ["Expansion.Conjunction"];
    dictEntry['Type'] = 'Explicit';
    dictEntry['Arg1Pos'] = 'PS';
+   relToConn2[str(relID)] = conn_indices;
    json.dump(dictEntry, p)
    p.write("\n");
 
@@ -1310,17 +1647,17 @@ if __name__ == '__main__':
  #prepRel('/home/development/code/explicit_args/arijit_rel', '/home/development/code/explicit_args/ss_relations.json') 
  #prepRel('/home/development/data/conll16st-en-01-12-16-dev', '/home/development/code/explicit_args/dev_rel.json')
  
- readInput('/home/development/data/conll16st-en-01-12-16-train','','train');
- #readInput('/home/development/code/explicit_args/conll16st/tutorial/conll16st-en-01-12-16-trial', 'train');
+ #readInput('/home/development/data/conll16st-en-01-12-16-train','','train');
+ #readInput('/home/development/code/explicit_args/conll16st/tutorial/conll16st-en-01-12-16-trial','','train');
  #print "Training Set: ", trainingSet;
  readInput(testRelationFilePath, testParseFilePath, 'test');
  #readInput('/home/development/code/connective_explicit/connectiveclassifierfinal', 'test');
  #readInput('/home/development/data/conll16st-en-01-12-16-dev', 'test');
  #readInput('/home/development/code/explicit_args/conll16st/tutorial/conll16st-en-01-12-16-trial', 'test');
- #print "Test Set: ", testSet; 
+ print "Size of Test Set: ", str(len(testSet)); 
  #classifyText(trainingSet, testSet);
 
- oa = test_maxent(nltk.classify.MaxentClassifier.ALGORITHMS, trainingSet, testSet, 0); 
+ oa = test_maxent(nltk.classify.MaxentClassifier.ALGORITHMS, trainingSet, testSet, 0, 'explicit_args/arg1PosModel_baseline_features'); 
  print "Size of Observed Array: " + str(len(oa));
  preprocessing(testParseFilePath);
  #preprocessing('/home/development/code/connective_explicit/connectiveclassifierfinal/');
@@ -1330,24 +1667,30 @@ if __name__ == '__main__':
  #ssOrPS('/home/development/data/conll16st-en-01-12-16-dev');
  
  #Training Set: Constituent
- trConn, trSet, SS_conns_parallel_list, SS_conns_not_parallel_list, parse_dict, ps_array = SS_parallel_not_parallel('/home/development/data/conll16st-en-01-12-16-train', 'train', []);
- 
+ #trConn, trSet, SS_conns_parallel_list, SS_conns_not_parallel_list, parse_dict, ps_array = SS_parallel_not_parallel('/home/development/data/conll16st-en-01-12-16-train', 'train', []);
+ #trConn, trSet, SS_conns_parallel_list, SS_conns_not_parallel_list, parse_dict, ps_array = SS_parallel_not_parallel('/home/development/code/explicit_args/conll16st/tutorial/conll16st-en-01-12-16-trial', 'train', []); 
  #Test Set: Constituent
  #SS_parallel_not_parallel('/home/development/data/conll16st-en-01-12-16-dev', 'test');
  #tSet = SS_parallel_not_parallel('/home/development/code/explicit_args/conll16st/tutorial/conll16st-en-01-12-16-trial', 'test'); 
  #tConn, tSet, SS_conns_parallel_list, SS_conns_not_parallel_list, parse_dict, ps_array = SS_parallel_not_parallel('/home/development/data/conll16st-en-01-12-16-dev', 'test', oa);
  tConn, tSet, SS_conns_parallel_list, SS_conns_not_parallel_list, parse_dict, ps_array = SS_parallel_not_parallel(testParseFilePath, 'test', oa);
  #tConn, tSet, SS_conns_parallel_list, SS_conns_not_parallel_list, parse_dict, ps_array = SS_parallel_not_parallel('/home/development/code/connective_explicit/connectiveclassifierfinal', 'test', oa);
- print "SS Parallel Size: " + str(len(SS_conns_parallel_list));
- print "SS Not Parallel Size: " + str(len(SS_conns_not_parallel_list));
- print "tConn: " + str(len(tConn));
- print "tSet: " + str(len(tSet));
+ 
+ print "Size of relationIDs: " + str(len(allRelationIDs));
+ print "Size of distinct relationIDs: " + str(len(set(allRelationIDs)));
+ print "Size of SS_conns_not_parallel_list: " + str(len(SS_conns_not_parallel_list));
+ print "Size of SS_conns_parallel_list: " + str(len(SS_conns_parallel_list));
+ #print "SS Parallel Size: " + str(len(SS_conns_parallel_list));
+ #print "SS Not Parallel Size: " + str(len(SS_conns_not_parallel_list));
+ #print "tConn: " + str(len(tConn));
+ #print "tSet: " + str(len(tSet));
+ #print "Size of PS: " + str(len(ps_array));
  #tConn, tSet, SS_conns_parallel_list, SS_conns_not_parallel_list, parse_dict = SS_parallel_not_parallel('/home/development/code/explicit_args/conll16st/tutorial/conll16st-en-01-12-16-trial', 'test', oa);
- predictedArray = test_maxent(nltk.classify.MaxentClassifier.ALGORITHMS, trSet, tSet, 1);
+ predictedArray = test_maxent(nltk.classify.MaxentClassifier.ALGORITHMS, trSet, tSet, 1, 'explicit_args/constClassModel_new_features');
  print "Size of Predicted Array: " + str(len(predictedArray));
  temp = mergeSS(tConn, predictedArray, SS_conns_not_parallel_list, parse_dict);
  print "Size of Temp: " + str(len(temp));
- scorerFile = '/home/development/code/explicit_args/ss_dev_out.json';
+ scorerFile = '/home/development/code/explicit_args/new_ss_scorer_file.json';
  printToFile(updatedRelationsFile, scorerFile, temp, parse_dict, ps_array);
  #printToFile('/home/development/code/explicit_args/ss_dev_out.json', temp, parse_dict, ps_array); 
  
@@ -1357,5 +1700,29 @@ if __name__ == '__main__':
  #ssOrPS('/home/development/code/explicit_args/conll16st/tutorial/conll16st-en-01-12-16-trial');
  #assignSSandPS('/home/development/data/conll16st-en-01-12-16-dev');
  #ssArgumentExt('/home/development/code/explicit_args/conll16st/tutorial/conll16st-en-01-12-16-trial');
- 
+ #print "All Relation IDs: " + str(sorted(allRelationIDs));
+ #print "All Relation IDs: " + str(len(set(allRelationIDs)));
+ #print "Parallel Relation IDs: " + str(sorted(paraRelIDs));
+ #print "Size of MergeSS Relations IDs: " + str(len(mergeSSrelations));
+ #print "MergeSS Relation IDs: " + str(sorted(mergeSSrelations));
+ #diffRel = set(allRelationIDs) - mergeSSrelations;
+ #print "Different in Relations Minus MergeSS: " + str(sorted(diffRel));
+ #diffSS = mergeSSrelations - set(allRelationIDs)
+ #print "Different in MergeSS Minus Relations: " + str(sorted(diffSS)); 
+ #diff = set(sorted(relToConn.keys())) - set(relToConn2.keys());
+ #print "Difference In Dictionaries: " + str(sorted(diff)); 
+ '''
+ with open('relationToConn.txt', 'w') as p:
+  for key, value in sorted(relToConn.items()):
+   p.write("Relation: " + str(key) + " has conn indices, " + str(value));
+   p.write("\n");
+ with open('relationToConn2.txt', 'w') as p:
+  for key, value in sorted(relToConn2.items()):
+   p.write("Relation: " + str(key) + " has conn indices, " + str(value)); 
+   p.write("\n");
+ with open('/home/development/code/explicit_args/nullArgs.txt', 'w') as f:
+  for q in nullArgs:
+   f.write(str(q));
+   f.write("\n");
+ '''
  print "Done with Execution Time: " + str((time.time() - start_time));
