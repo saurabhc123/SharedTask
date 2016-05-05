@@ -1662,7 +1662,7 @@ if __name__ == '__main__':
  preprocessing(testParseFilePath);
  #preprocessing('/home/development/code/connective_explicit/connectiveclassifierfinal/');
  #preprocessing('/home/development/data/conll16st-en-01-12-16-dev');
- preprocessing2('/home/development/code/explicit_args/connective-category.txt');
+ preprocessing2('explicit_args/connective-category.txt');
  #preprocessing('/home/development/code/explicit_args/conll16st/tutorial/conll16st-en-01-12-16-trial');
  #ssOrPS('/home/development/data/conll16st-en-01-12-16-dev');
  
