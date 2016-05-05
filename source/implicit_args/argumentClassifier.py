@@ -562,6 +562,7 @@ class argumentClassifier:
 
         arg1TokenList = [];
         arg2TokenList = [];
+
         for relation in relations:
             connectiveType = relation['Type'];
             arg1RelationsTokenList = relation['Arg1']['TokenList'];
@@ -570,8 +571,16 @@ class argumentClassifier:
             arg2SentenceNumber = relation['Arg2']['TokenList'][0][3];
             relationDocId = relation['DocID'];
             relationSense = relation['Sense'];
-            arg1RawText = relation['Arg1']['RawText']
-            arg2RawText = relation['Arg2']['RawText']
+            if 'RawText' in relation['Arg1']:
+                arg1RawText = relation['Arg1']['RawText']
+            else:
+                arg1RawText = ''
+
+            if 'RawText' in relation['Arg2']:
+                arg2RawText = relation['Arg2']['RawText']
+            else:
+                arg2RawText = ''
+
             connective = relation['Connective']
             id = relation['ID']
             if connectiveType != 'Implicit':
