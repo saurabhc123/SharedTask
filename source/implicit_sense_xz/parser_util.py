@@ -2,7 +2,7 @@
 import util, config, os, json
 from connective_dict import Connectives_dict
 from example import Example
-import model_trainer.mallet_util as mallet_util
+import mallet_util
 from model_trainer.NT_arg_extractor.constituent import Constituent
 from syntax_tree import Syntax_tree
 from connective import Connective
