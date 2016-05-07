@@ -21,6 +21,22 @@ import util
 import argparse
 import pickle
 
+def get_conn_to_root_path(parse_dict, DocID, sent_index, conn_indices):
+    parse_tree = parse_dict[DocID]["sentences"][sent_index]["parsetree"].strip()
+    syntax_tree = Syntax_tree(parse_tree)
+    if syntax_tree.tree == None:
+        path = "NONE_TREE"
+    else:
+        path = ""
+        for conn_index in conn_indices:
+            conn_node = syntax_tree.get_leaf_node_by_token_index(conn_index)
+            t = syntax_tree.get_node_path_to_root(conn_node)
+            path += t + "&"
+        if path[-1] == "&":
+            path = path[:-1]
+
+    return path
+
 def _get_constituents(parse_dict, connective):
     DocID = connective.DocID
     sent_index = connective.sent_index
@@ -85,7 +101,7 @@ def test_maxent(algorithms, train, test, flag, modelFileName):
      p = 0.0;
      r = 0.0;
      f = 0.0;
-     #classifiers[algorithm] = nltk.MaxentClassifier.train(train, algorithm, trace=0, max_iter=5)
+     #classifiers[algorithm] = nltk.MaxentClassifier.train(train, algorithm, trace=0, max_iter=20)
      if os.path.isfile(modelFileName):
       print "Model Exists";
       with open(modelFileName, "r") as filename:
@@ -93,7 +109,10 @@ def test_maxent(algorithms, train, test, flag, modelFileName):
        classifiers['IIS'] = arg1Model;
      else:
       print "No Model Exists";
-      classifiers[algorithm] = nltk.MaxentClassifier.train(train, algorithm, trace=0, max_iter=5)
+      if flag == 0:
+       classifiers[algorithm] = nltk.MaxentClassifier.train(train, algorithm, trace=0, max_iter=15)
+      else:
+       classifiers[algorithm] = nltk.MaxentClassifier.train(train, algorithm, trace=0, max_iter=50)
      for algorithm, classifier in classifiers.items():
          refsets = collections.defaultdict(set)
          testsets = collections.defaultdict(set)
@@ -392,12 +411,13 @@ def readInput(inputFilenamePath, inputParse, trainOrTest):
    ptree = ParentedTree.fromstring(pt);
    #print ptree;
    crp = "";
-
+   crp = get_conn_to_root_path(en_parse_dict, relation_DocID, parseJSON_sentence_number, connectiveWordIDs);
+   '''
    try:
     crp = current_to_root(connectiveWordID, ptree);
    except:
     continue;
-
+   '''
    
    features['f14'] = crp;
    #features.append(crp);
@@ -1579,7 +1599,7 @@ def printToFile(relFile, outFile, temp, parse_dict, ps_array):
    '''
  #print "Dict Sentence: " + str(dictSentenceToken);
  #print "Dict Document: " + str(dictDocumentToken);
-   
+
  with open(relFile, 'a') as p:
   print "Size of PS Entries: " + str(len(ps_array));
   for ps_entry in ps_array:
@@ -1657,7 +1677,7 @@ if __name__ == '__main__':
  print "Size of Test Set: ", str(len(testSet)); 
  #classifyText(trainingSet, testSet);
 
- oa = test_maxent(nltk.classify.MaxentClassifier.ALGORITHMS, trainingSet, testSet, 0, 'explicit_args/arg1PosModel_baseline_features'); 
+ oa = test_maxent(nltk.classify.MaxentClassifier.ALGORITHMS, trainingSet, testSet, 0, 'explicit_args/arg1PosModel_15'); 
  print "Size of Observed Array: " + str(len(oa));
  preprocessing(testParseFilePath);
  #preprocessing('/home/development/code/connective_explicit/connectiveclassifierfinal/');
@@ -1686,11 +1706,11 @@ if __name__ == '__main__':
  #print "tSet: " + str(len(tSet));
  #print "Size of PS: " + str(len(ps_array));
  #tConn, tSet, SS_conns_parallel_list, SS_conns_not_parallel_list, parse_dict = SS_parallel_not_parallel('/home/development/code/explicit_args/conll16st/tutorial/conll16st-en-01-12-16-trial', 'test', oa);
- predictedArray = test_maxent(nltk.classify.MaxentClassifier.ALGORITHMS, trSet, tSet, 1, 'explicit_args/constClassModel_new_features');
+ predictedArray = test_maxent(nltk.classify.MaxentClassifier.ALGORITHMS, trSet, tSet, 1, 'explicit_args/constClassModel_50');
  print "Size of Predicted Array: " + str(len(predictedArray));
  temp = mergeSS(tConn, predictedArray, SS_conns_not_parallel_list, parse_dict);
  print "Size of Temp: " + str(len(temp));
- scorerFile = '/home/development/code/explicit_args/new_ss_scorer_file.json';
+ scorerFile = '/home/development/code/explicit_args/final_scorer_file.json';
  printToFile(updatedRelationsFile, scorerFile, temp, parse_dict, ps_array);
  #printToFile('/home/development/code/explicit_args/ss_dev_out.json', temp, parse_dict, ps_array); 
  
@@ -1711,18 +1731,41 @@ if __name__ == '__main__':
  #print "Different in MergeSS Minus Relations: " + str(sorted(diffSS)); 
  #diff = set(sorted(relToConn.keys())) - set(relToConn2.keys());
  #print "Difference In Dictionaries: " + str(sorted(diff)); 
- '''
- with open('relationToConn.txt', 'w') as p:
-  for key, value in sorted(relToConn.items()):
-   p.write("Relation: " + str(key) + " has conn indices, " + str(value));
-   p.write("\n");
- with open('relationToConn2.txt', 'w') as p:
-  for key, value in sorted(relToConn2.items()):
-   p.write("Relation: " + str(key) + " has conn indices, " + str(value)); 
-   p.write("\n");
- with open('/home/development/code/explicit_args/nullArgs.txt', 'w') as f:
-  for q in nullArgs:
-   f.write(str(q));
-   f.write("\n");
- '''
  print "Done with Execution Time: " + str((time.time() - start_time));
+
+'''
+def getTrainingModel(train, flag):
+ #classifier = nltk.NaiveBayesClassifier.train(train);
+ algorithm = 'IIS';
+ if flag == 0:
+  print "Max Iter: 15";
+  classifier = nltk.MaxentClassifier.train(train, algorithm, trace=0, max_iter=15)
+ else:
+  print "Max Iter: 50";
+  classifier = nltk.MaxentClassifier.train(train, algorithm, trace=0, max_iter=50)
+ return classifier;
+
+import pickle
+if __name__ == '__main__':
+ start_time = time.time();
+
+ print "Training Position Classifier";
+ readInput('/home/development/data/conll16st-en-01-12-16-train','', 'train');
+ print "Done reading Input";
+ arg1PosModel = getTrainingModel(trainingSet, 0);
+ print "Done training position";
+ f = open('/home/development/code/explicit_args/arg1PosModel_15', 'wb')
+ pickle.dump(arg1PosModel, f)
+ print "Done writing training position classifier";
+
+ #Training Set: Constituent
+ print "Training constituent classifier";
+ trConn, trSet, SS_conns_parallel_list, SS_conns_not_parallel_list, parse_dict, ps_array = SS_parallel_not_parallel('/home/development/data/conll16st-en-01-12-16-train', 'train', []);
+ print "Done reading input";
+ constClassModel = getTrainingModel(trSet, 1);
+ print "Done training classifier";
+ f = open('/home/development/code/explicit_args/constClassModel_50', 'wb')
+ pickle.dump(constClassModel, f) 
+ print "Done printing training constituent classifier"; 
+ print "Done with Execution Time: " + str((time.time() - start_time));
+'''
