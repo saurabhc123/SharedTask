@@ -55,21 +55,21 @@ def prune(featureIndex, dataset):
 def implicitSenseExample():
    trainingParses = '/home/jtk0/competition2/development/data/conll16st-en-01-12-16-train/parses.json'
    trainingRelations = '/home/jtk0/competition2/development/data/conll16st-en-01-12-16-train/relations.json'
-   myDirectory ='/home/jtk0/competition2/development/code/conll-shared-task/code/'
+   myDirectory ='/home/jtk0/competition3/SharedTask/source/implicit_sense'
    
    testingParses = '/home/jtk0/competition2/development/data/conll16st-en-01-12-16-dev/parses.json'
 #   testingRelations = '/home/jtk0/competition2/development/data/conll16st-en-01-12-16-dev/relations.json'
    testingRelations ='/home/jtk0/competition2/development/code/conll-shared-task/code/test.json' 
    result = '/home/jtk0/competition2/development/code/conll-shared-task/code/implicitResults.json'
    relationOrResult = "result"
-   return   implicitSense(trainingParses, trainingRelations, myDirectory,testingParses, testingRelations, result, relationOrResult)
+   return   implicitSense(testingRelations, testingParses, result)
 
 #Use this!!!!!
 def implicitSense(testingRelations,testingParses, result):
   relationOrResult = "relation"
-  trainingParses=None
-  trainingRelation = None
-  myDirectory = "implicit_sense/"
+  trainingParses='/home/jtk0/competition2/development/data/conll16st-en-01-12-16-train/parses.json'
+  trainingRelation = '/home/jtk0/competition2/development/data/conll16st-en-01-12-16-train/relations.json'
+  myDirectory ='implicit_sense/'#/home/jtk0/competition3/SharedTask/source/implicit_sense/'
   classifier=training(trainingParses, trainingRelation, myDirectory)
   testing(classifier, testingParses, testingRelations,myDirectory,result,relationOrResult)
   return classifier
@@ -124,8 +124,8 @@ def training( parsesPath, relationsPath, myDirectory):
                 features.update(finalBCDict)
                 features.update(bc.bcOneLinePairDataSecondIteration(relation,baseBCDict,finalBCDict, parses))
 
-                features.update(finalBCArgsDict)
-                features.update(bca.bcOneLineArgumentDataSecondIteration(relation,baseBCDict,finalBCArgsDict,parses))
+#                features.update(finalBCArgsDict)
+#                features.update(bca.bcOneLineArgumentDataSecondIteration(relation,baseBCDict,finalBCArgsDict,parses))
 
                 features.update(prodDict)
                 features.update(pr.bcOneLinePairDataSecondIteration(relation,parses,prodDict))
@@ -133,8 +133,8 @@ def training( parsesPath, relationsPath, myDirectory):
                 features.update(finalFLDict)
                 features.update(fl.bcOneLinePairDataSecondIteration(relation,None,finalFLDict,parses))
 
-                features.update(finalDRDict)
-                features.update(dr.bcOneLinePairDataSecondIteration(relation,parses,finalDRDict))
+#                features.update(finalDRDict)
+#                features.update(dr.bcOneLinePairDataSecondIteration(relation,parses,finalDRDict))
  
 #                polarityFeatures, polarityKeySet = polarity_feature_extractor.get_polarity_features(relation, parses)
 #                features.update(polarityFeatures)
@@ -208,8 +208,8 @@ def testing(classifier, parses,relations, myDirectory,finalFile,relationOrResult
               features.update(finalBCDict)
               features.update(bc.bcOneLinePairDataSecondIteration(testRelation,baseBCDict,finalBCDict, testingParses))
   
-              features.update(finalBCArgsDict)
-              features.update(bca.bcOneLineArgumentDataSecondIteration(testRelation,baseBCDict,finalBCArgsDict, testingParses))
+#              features.update(finalBCArgsDict)
+#              features.update(bca.bcOneLineArgumentDataSecondIteration(testRelation,baseBCDict,finalBCArgsDict, testingParses))
               
               features.update(prodDict)
               features.update(pr.bcOneLinePairDataSecondIteration(testRelation,testingParses,prodDict))
@@ -217,8 +217,8 @@ def testing(classifier, parses,relations, myDirectory,finalFile,relationOrResult
               features.update(finalFLDict)
               features.update(fl.bcOneLinePairDataSecondIteration(testRelation,None,finalFLDict,testingParses))
 
-              features.update(finalDRDict)
-              features.update(dr.bcOneLinePairDataSecondIteration(testRelation,testingParses,finalDRDict))
+#              features.update(finalDRDict)
+#              features.update(dr.bcOneLinePairDataSecondIteration(testRelation,testingParses,finalDRDict))
 
 #            polarityFeatures, polarityKeySet = polarity_feature_extractor.get_polarity_features(testRelation, testingParses)
 #            features.update(polarityFeatures)
@@ -258,7 +258,10 @@ def testing(classifier, parses,relations, myDirectory,finalFile,relationOrResult
             finalResult["Connective"]["TokenList"]=[]
             finalResult["Connective"]["CharacterSpanList"]=[]
             finalResult["DocID"]=relationDocId
-            finalResult["ID"]=200000+wrong+correct
+            if 'ID' in testRelation:
+              finalResult['ID']=testRelation['ID']
+            else:
+              finalResult["ID"]=200000+wrong+correct
             finalResult["Sense"]= relationSense
             if relationSense == ["EntRel"]:
               finalResult["Type"] = "EntRel"

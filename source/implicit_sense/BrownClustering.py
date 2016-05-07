@@ -46,6 +46,7 @@ def bcOneLinePairDataSecondIteration(relation, basicBCList,filterList,parses):
 
 def createBaseBCDict(implicitDirectory):
     basicBCList={}
+    print implicitDirectory+'brownClustering.dat'
     if not os.path.isfile(implicitDirectory+'brownClustering.dat'):
       ifThisFunctionCausesACrashThenWeAreMissingTheBrownClusteringFile()
     f = open(implicitDirectory+'brownClustering.dat')
