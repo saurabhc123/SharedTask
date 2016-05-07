@@ -567,8 +567,14 @@ class argumentClassifier:
             connectiveType = relation['Type'];
             arg1RelationsTokenList = relation['Arg1']['TokenList'];
             arg2RelationsTokenList = relation['Arg2']['TokenList'];
-            arg1SentenceNumber = relation['Arg1']['TokenList'][0][3];
-            arg2SentenceNumber = relation['Arg2']['TokenList'][0][3];
+            if len(arg1RelationsTokenList) > 0:
+                arg1SentenceNumber = relation['Arg1']['TokenList'][0][3]
+            else:
+                arg1SentenceNumber = 200000
+            if len(arg2RelationsTokenList) > 0:
+                arg2SentenceNumber = relation['Arg2']['TokenList'][0][3];
+            else:
+                arg2SentenceNumber = 300000
             relationDocId = relation['DocID'];
             relationSense = relation['Sense'];
             if 'RawText' in relation['Arg1']:
@@ -590,8 +596,7 @@ class argumentClassifier:
                     map(lambda tokenList: self.generateTokenListForOutput(tokenList), relation['Arg2']['TokenList']));
 
             if connectiveType == 'Implicit':
-                arg1Sentence = parsedData.documents[relationDocId][arg1SentenceNumber];
-                arg2Sentence = parsedData.documents[relationDocId][arg2SentenceNumber];
+
 
                 if arg1SentenceNumber == arg2SentenceNumber:
                     f2 = 0;
@@ -600,6 +605,8 @@ class argumentClassifier:
                     arg2TokenList = list(map(lambda tokenList: self.generateTokenListForOutput(tokenList),
                                              relation['Arg2']['TokenList']));
                 elif arg2SentenceNumber - arg1SentenceNumber == 1:
+                    arg1Sentence = parsedData.documents[relationDocId][arg1SentenceNumber];
+                    arg2Sentence = parsedData.documents[relationDocId][arg2SentenceNumber];
                     arg1TokenList = self.getPredictedTokenListForSentence(arg1Sentence, arg1Classifier, "Arg1");
                     arg2TokenList = self.getPredictedTokenListForSentence(arg2Sentence, arg2Classifier, "Arg2");
                     # arg1TokenList = list(map(lambda tokenList: self.generateTokenListForOutput(tokenList), relation['Arg1']['TokenList']));
