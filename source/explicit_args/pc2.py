@@ -20,7 +20,7 @@ from example import Example
 import util
 import argparse
 import pickle
-
+import sys
 def get_conn_to_root_path(parse_dict, DocID, sent_index, conn_indices):
     parse_tree = parse_dict[DocID]["sentences"][sent_index]["parsetree"].strip()
     syntax_tree = Syntax_tree(parse_tree)
@@ -196,7 +196,7 @@ def makeDictByDocID(parseDict):
     w=sentence['words'][wordID][0]
     pos=sentence['words'][wordID][1]['PartOfSpeech']
     dictByDocID[docID][sentenceID][wordID]={}
-    dictByDocID[docID][sentenceID][wordID]['word']=w
+    #dictByDocID[docID][sentenceID][wordID]['word']=w
     dictByDocID[docID][sentenceID][wordID]['pos']=pos
     dictByDocID[docID][sentenceID][wordID]['tokenID']=tokenID
     tokenID+=1
@@ -213,7 +213,7 @@ def readInput(inputFilenamePath, inputParse, trainOrTest):
  else:
   pdtb_file = codecs.open(inputFilenamePath+'/relations.json', encoding='utf8');
  relations = [json.loads(x) for x in pdtb_file];
-
+ #/sys.stderr.write("Len of Relations: " + str(len(relations)));
  #Read parses.json 
  if trainOrTest == "test":
   parse_file = codecs.open(inputParse, encoding='utf8');
@@ -222,6 +222,8 @@ def readInput(inputFilenamePath, inputParse, trainOrTest):
  en_parse_dict = json.load(parse_file)
  #makeDictByDocID(en_parse_dict);
 
+ with open('/home/VTNLPS16/SharedTask/source/tempR.json', 'w') as q:
+  json.dump(relations, q);
  counter = 0;
  flag = 0;
  featureSet = [];
@@ -231,34 +233,36 @@ def readInput(inputFilenamePath, inputParse, trainOrTest):
  countOfExplicit = 0;
  #bigDiction = dict();
  bigDictionIndex = 0;
+ countExcept = 0;
  for relation in relations:
-  cType = relation['Type']; 
-  label = "";
-  if cType == 'Explicit':
-   if trainOrTest == 'train':
-    countOfExplicit = countOfExplicit + 1;
-    arg1_sentence_number = relation['Arg1']['TokenList'][0][3];
-    arg2_sentence_number = relation['Arg2']['TokenList'][0][3];   
-    if arg1_sentence_number == arg2_sentence_number:
-     label = 'SS';
-    else:
-     label = 'PS'; 
+  try: 
+   cType = relation['Type']; 
+   label = "";
+   if cType == 'Explicit':
+    if trainOrTest == 'train':
+     countOfExplicit = countOfExplicit + 1;
+     arg1_sentence_number = relation['Arg1']['TokenList'][0][3];
+     arg2_sentence_number = relation['Arg2']['TokenList'][0][3];   
+     if arg1_sentence_number == arg2_sentence_number:
+      label = 'SS';
+     else:
+      label = 'PS'; 
 
     #Arg1 Token List Generation
-    arg1TokenList = [];
-    arg1STokenList = [];
-    for a1i in enumerate(relation['Arg1']['TokenList']):
+     arg1TokenList = [];
+     arg1STokenList = [];
+     for a1i in enumerate(relation['Arg1']['TokenList']):
      #print str(a1i);
      #print "Arg 1: " + str(a1i[1][2]);
-     arg1TokenList.append(a1i[1][2]);
-     arg1STokenList.append(a1i[1][4]);
+      arg1TokenList.append(a1i[1][2]);
+      arg1STokenList.append(a1i[1][4]);
    
     #Arg1 Token List Generation
-    arg2TokenList = [];
-    arg2STokenList = [];
-    for a2i in enumerate(relation['Arg2']['TokenList']):
-     arg2TokenList.append(a2i[1][2]);
-     arg2STokenList.append(a2i[1][4]);
+     arg2TokenList = [];
+     arg2STokenList = [];
+     for a2i in enumerate(relation['Arg2']['TokenList']):
+      arg2TokenList.append(a2i[1][2]);
+      arg2STokenList.append(a2i[1][4]);
 
    #print "Relation Number " + str(counter) + " has explicit connective with connective word being : '" + relation['Connective']['RawText'] + "'";
    relation_DocID = relation['DocID'];
@@ -332,13 +336,8 @@ def readInput(inputFilenamePath, inputParse, trainOrTest):
     connectivePOSs.append(str(parseObject['words'][connectiveWordIDs[i]][1]['PartOfSpeech']));
    features['f3'] = ' '.join(connectivePOSs);
 
-   '''
-   connectivePOS = str(parseObject['words'][connectiveWordID][1]['PartOfSpeech']);
-   features['f3'] = connectivePOS;
-   #features.append(connectivePOS);
-   '''
 
-   #connectiveWordID is the first connective
+    #connectiveWordID is the first connective
    connectiveWordID = connectiveWordIDs[0];
    
    #Feature 4, 5, 6 & 7: prev_1
@@ -374,7 +373,7 @@ def readInput(inputFilenamePath, inputParse, trainOrTest):
    #features.append(prev_2);
    features['f9'] = prev_2_POS;
    #features.append(prev_2_POS);
-
+   
    prev_2_plus_C = prev_2 + "_" + ' '.join(connectiveWords);
    #prev_2_plus_C = prev_2 + "_" + connectiveWord;
    features['f10'] = prev_2_plus_C;
@@ -412,43 +411,19 @@ def readInput(inputFilenamePath, inputParse, trainOrTest):
    #print ptree;
    crp = "";
    crp = get_conn_to_root_path(en_parse_dict, relation_DocID, parseJSON_sentence_number, connectiveWordIDs);
-   '''
-   try:
-    crp = current_to_root(connectiveWordID, ptree);
-   except:
-    continue;
-   '''
    
    features['f14'] = crp;
    #features.append(crp);
-   '''
-   #Feature 15: next_1 string
-   next_1 = '';
-   if connectiveWordID <= len(parseObject['words'])-2:
-    next_1 = str(parseObject['words'][connectiveWordID + 1][0]); 
-   features['f15'] = next_1;  
-
-   #Feature 16: next_1_POS
-   features['f16'] = next_1_POS;
-
-   #Feature 17: next_1 + C
-   features['f17'] = next_1 + "_" + strConnectiveWords;
-   
-   #Feature 18: next_2_POS
-   next_2_POS = '';
-   if connectiveWordID <= len(parseObject['words'])-3:
-     next_2_POS = str(parseObject['words'][connectiveWordID + 2][1]['PartOfSpeech']);
-   features['f18'] = next_2_POS;
-
-   #Feature 19: next_2 + C
-   features['f19'] = next_2 + "_" + strConnectiveWords;
-
-   #Feature 20: next_2_POS + C_POS
-   features['f20'] = next_2_POS + "_" + ' '.join(connectivePOSs);
-   '''
    #featForConn[(relation_DocID, parseJSON_sentence_number, tuple(connectiveWordIDs))] = features;
-
-   if(trainOrTest == 'test'):
+  except:
+   #exc_type, exc_obj, exc_tb = sys.exc_info()
+   #fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+   #print(exc_type, fname, exc_tb.tb_lineno) 
+   #sys.stderr.write( exc_tb.tb_lineno);
+   #raise 
+   #countExcept = countExcept + 1;
+   continue;
+  if(trainOrTest == 'test'):
     arg1TokenList = [];
     arg2TokenList = [];
     arg1STokenList = [];
@@ -458,12 +433,12 @@ def readInput(inputFilenamePath, inputParse, trainOrTest):
     featForConnTs[(relation_DocID, parseJSON_sentence_number, tuple(connectiveWordIDs))] = features;
     bigDictionIndex = bigDictionIndex + 1;
      
-   if(trainOrTest == 'train'):
+  if(trainOrTest == 'train'):
     obigDiction[bigDictionIndex] = (features, label, relation_DocID, parseJSON_sentence_number, connectiveWordIDs, strConnectiveWords, arg1TokenList, arg2TokenList, arg1STokenList, arg2STokenList, relID);
     featForConnTr[(relation_DocID, parseJSON_sentence_number, tuple(connectiveWordIDs))] = features;
     bigDictionIndex = bigDictionIndex + 1;
     trainingSet.append((features, label));
-   else:
+  else:
     testSet.append((features, label));
     #testSet.append(features); 
 
@@ -471,71 +446,10 @@ def readInput(inputFilenamePath, inputParse, trainOrTest):
    #featureSet.append(features);
    #labelSet.append(label);
   counter = counter + 1;
+  #raise ValueError("Omitted: ", countExcept);
  #print "Number of Explicit Relations: " + str(countOfExplicit);
- num_folds = 10
+ #num_folds = 10
  #cv = cross_validation.KFold(len(trainingSet), n_folds=10, indices=True, shuffle=False, random_state=None)
- '''
- cv = cross_validation.KFold(len(trainingSet), n_folds=num_folds, shuffle=True, random_state=None); 
- accuracy = 0.0;
- p = 0.0;
- r = 0.0;
- f = 0.0;
- 
- p1 = 0.0;
- r1 = 0.0;
- f1 = 0.0;
- 
- for traincv, testcv in cv:
-
-    classifier = nltk.NaiveBayesClassifier.train(trainingSet[traincv[0]:traincv[len(traincv)-1]])
-    accuracy = accuracy + nltk.classify.util.accuracy(classifier, trainingSet[testcv[0]:testcv[len(testcv)-1]]);
-    #print 'accuracy:', nltk.classify.util.accuracy(classifier, trainingSet[testcv[0]:testcv[len(testcv)-1]])
-
-    refsets = collections.defaultdict(set)
-    testsets = collections.defaultdict(set)
-
-    truth = set();
-    predicted = set();   
-   
-    for i, (feats, label) in enumerate(trainingSet[testcv[0]:testcv[len(testcv)-1]]):
-     refsets[label].add(i)
-     observed = classifier.classify(feats)
-     testsets[observed].add(i)
-    
-    p = p + (precision(refsets['PS'], testsets['PS']) + precision(refsets['SS'], testsets['SS']))/2;
-    r = r + (recall(refsets['PS'], testsets['PS']) + recall(refsets['SS'], testsets['SS']))/2;
-    f = f + (f_measure(refsets['PS'], testsets['PS']) + f_measure(refsets['SS'], testsets['SS']))/2;
- print "Accuracy: ", accuracy/num_folds;
- print "Precision: ", p/num_folds;
- print "Recall: ", r/num_folds;
- print "F-measure: ", f/num_folds; 
- #print "Precision: ", p1/num_folds;
- #print "Recall: ", r1/num_folds;
- #print "F-measure: ", f1/num_folds;
- '''
-'''
- train_set, test_set = trainingSet[500:], trainingSet[:500];
- classifier = nltk.classify.NaiveBayesClassifier.train(train_set);
- print (sorted(classifier.labels()));
- refsets = collections.defaultdict(set)
- testsets = collections.defaultdict(set)
- 
- for i, (feats, label) in enumerate(test_set):
-  #print "i: " + str(i);
-  #print "features: " + str(feats);
-  #print "label: " + str(label);
-  refsets[label].add(i)
-  observed = classifier.classify(feats)
-  #print "Observed : " + str(observed);
-  testsets[observed].add(i)
- 
- print 'PS precision:', precision(refsets['PS'], testsets['PS'])
- print 'PS recall:', recall(refsets['PS'], testsets['PS'])
- print 'PS F-measure:', f_measure(refsets['PS'], testsets['PS'])
- print 'SS precision:', precision(refsets['SS'], testsets['SS'])
- print 'SS recall:', recall(refsets['SS'], testsets['SS'])
- print 'SS F-measure:', f_measure(refsets['SS'], testsets['SS'])
-'''
 
 def classifyText(train, test):
  #print "In function: classifyText";
@@ -597,7 +511,7 @@ def preprocessing2(inputFilenamePath):
   conn_category[conn] = category
 
 def preprocessing(inputFilenamePath):
- parse_file = codecs.open(inputFilenamePath, encoding='utf8')
+ parse_file = codecs.open(inputFilenamePath, encoding='ascii')
  en_parse_dict = json.load(parse_file)
  
  for filename, sentenceObject in en_parse_dict.iteritems():
@@ -633,9 +547,9 @@ psRelations = []
 ssRelations = []
 def splitSSandPS(inputFilenamePath, trainOrTest, observedArray):
  if trainOrTest == "train":
-  parse_file = codecs.open(inputFilenamePath+'/parses.json', encoding='utf8');
+  parse_file = codecs.open(inputFilenamePath+'/parses.json', encoding='ascii');
  else:
-  parse_file = codecs.open(inputFilenamePath, encoding='utf8');
+  parse_file = codecs.open(inputFilenamePath, encoding='ascii');
  en_parse_dict = json.load(parse_file);
  dictByDocID = makeDictByDocID(en_parse_dict);
 
@@ -1471,7 +1385,7 @@ relToConn2 = dict();
 def printToFile(relFile, outFile, temp, parse_dict, ps_array):
  index = 0;
  
- with open(relFile, 'w') as f:
+ with open(relFile, 'wb') as f:
   print "Size of SS Entries: " + str(len(temp));
   for data in temp:
    dictEntry = dict();
@@ -1600,7 +1514,7 @@ def printToFile(relFile, outFile, temp, parse_dict, ps_array):
  #print "Dict Sentence: " + str(dictSentenceToken);
  #print "Dict Document: " + str(dictDocumentToken);
 
- with open(relFile, 'a') as p:
+ with open(relFile, 'ab') as p:
   print "Size of PS Entries: " + str(len(ps_array));
   for ps_entry in ps_array:
    dictEntry = dict();
@@ -1675,17 +1589,23 @@ if __name__ == '__main__':
  #readInput('/home/development/data/conll16st-en-01-12-16-dev', 'test');
  #readInput('/home/development/code/explicit_args/conll16st/tutorial/conll16st-en-01-12-16-trial', 'test');
  print "Size of Test Set: ", str(len(testSet)); 
+ #sys.stderr.write("with Test Set Size: " + str(len(testSet)) );
  #classifyText(trainingSet, testSet);
 
+ 
  oa = test_maxent(nltk.classify.MaxentClassifier.ALGORITHMS, trainingSet, testSet, 0, 'explicit_args/arg1PosModel_15'); 
- print "Size of Observed Array: " + str(len(oa));
+ #print "Size of Observed Array: " + str(len(oa));
+ #sys.stderr.write("with Test Set Size: " + str(len(oa)) );
+ 
  preprocessing(testParseFilePath);
  #preprocessing('/home/development/code/connective_explicit/connectiveclassifierfinal/');
  #preprocessing('/home/development/data/conll16st-en-01-12-16-dev');
+ #sys.stderr.write("with Test Set Size: " + str(len(oa)) );
+ 
  preprocessing2('explicit_args/connective-category.txt');
  #preprocessing('/home/development/code/explicit_args/conll16st/tutorial/conll16st-en-01-12-16-trial');
  #ssOrPS('/home/development/data/conll16st-en-01-12-16-dev');
- 
+ #sys.stderr.write("with Test Set Size: " + str(len(oa)) );
  #Training Set: Constituent
  #trConn, trSet, SS_conns_parallel_list, SS_conns_not_parallel_list, parse_dict, ps_array = SS_parallel_not_parallel('/home/development/data/conll16st-en-01-12-16-train', 'train', []);
  #trConn, trSet, SS_conns_parallel_list, SS_conns_not_parallel_list, parse_dict, ps_array = SS_parallel_not_parallel('/home/development/code/explicit_args/conll16st/tutorial/conll16st-en-01-12-16-trial', 'train', []); 
@@ -1695,6 +1615,7 @@ if __name__ == '__main__':
  #tConn, tSet, SS_conns_parallel_list, SS_conns_not_parallel_list, parse_dict, ps_array = SS_parallel_not_parallel('/home/development/data/conll16st-en-01-12-16-dev', 'test', oa);
  tConn, tSet, SS_conns_parallel_list, SS_conns_not_parallel_list, parse_dict, ps_array = SS_parallel_not_parallel(testParseFilePath, 'test', oa);
  #tConn, tSet, SS_conns_parallel_list, SS_conns_not_parallel_list, parse_dict, ps_array = SS_parallel_not_parallel('/home/development/code/connective_explicit/connectiveclassifierfinal', 'test', oa);
+ #sys.stderr.write("with Test Set Size: " + str(len(oa)) + " and size of non parallel: " + str(len(SS_conns_not_parallel_list)));
  
  print "Size of relationIDs: " + str(len(allRelationIDs));
  print "Size of distinct relationIDs: " + str(len(set(allRelationIDs)));
@@ -1731,6 +1652,7 @@ if __name__ == '__main__':
  #print "Different in MergeSS Minus Relations: " + str(sorted(diffSS)); 
  #diff = set(sorted(relToConn.keys())) - set(relToConn2.keys());
  #print "Difference In Dictionaries: " + str(sorted(diff)); 
+ #sys.stderr.write("Size of SS " + str(len(temp)) + ", Size of PS: " + str(len(ps_array)) ); 
  print "Done with Execution Time: " + str((time.time() - start_time));
 
 '''

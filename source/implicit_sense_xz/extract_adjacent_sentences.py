@@ -1,5 +1,5 @@
 #!/usr/bin/python
-from sys import argv,exit
+import sys
 import func
 import codecs
 import json
@@ -29,7 +29,13 @@ from nltk.tokenize import sent_tokenize
 
 def writeOutputFormat(relations,outF):
 	for relation in relations:
-		outF.write('%s\n' % json.dumps(relation))
+		try:
+			outF.write('%s\n' % json.dumps(relation))
+		except:
+			exc_type, exc_obj, exc_tb = sys.exc_info()
+			fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+			sys.stderr.write(exc_type + '\t' + fname + '\t' + exc_tb.tb_lineno)
+			continue
 
 def produceNonExplicitRelationCandidates(predictionsF, parsesF, docDir):
 	relations = []	
@@ -84,9 +90,16 @@ def produceNonExplicitRelationCandidates(predictionsF, parsesF, docDir):
 			relation['DocID'] = DocID
 			
 			#do Arg1
-			relation['Arg1'] = extractArgFields(DocID, sen1, sen1ID, dictByDocID)
+			arg1 = extractArgFields(DocID, sen1, sen1ID, dictByDocID)
+			if len(arg1['TokenList']) < 1:
+				continue
+			relation['Arg1'] = arg1
+			
 			#do Arg2
-			relation['Arg2'] = extractArgFields(DocID, sen2, sen2ID, dictByDocID)
+			arg2 = extractArgFields(DocID, sen2, sen2ID, dictByDocID)
+			if len(arg2['TokenList']) < 1:
+				continue
+			relation['Arg2'] = arg2
 			
 			#Append relation
 			relationCount += 1
@@ -165,6 +178,7 @@ def produceRelationsFile(predictionsF, parsesF, docDir, writeF):
 	relations = produceNonExplicitRelationCandidates(predictionsF, parsesF, docDir)
 	outputF=open(writeF,'w')
 	writeOutputFormat(relations, outputF)
+	outputF.close()
 	
 
 # relations = produceNonExplicitRelationCandidates(predictionsF, parsesF, docDir)

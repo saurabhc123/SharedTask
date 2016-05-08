@@ -13,7 +13,7 @@ def readInput(inputFilenamePath):
 	
 	#Read parses.json
 	print ("    Reading parses.json");
-	parse_file = codecs.open(inputFilenamePath, encoding='utf8')
+	parse_file = codecs.open(inputFilenamePath, encoding='ascii')
 	en_parse_dict = json.load(parse_file)
 	print ("    Done");
 	return en_parse_dict
@@ -159,183 +159,170 @@ def gen_features(input_file_path):
 			else:
 				lpind=0
 			for counter,next in enumerate(sentence['words']):
-				next[0]=next[0].lower()
-				p_multi_ind=0
-				c_multi_ind=0
-				p_multi_ind_th=0
-				c_multi_th=0
-				#print next[0]
+				iserror=0
 				tokenid=tokenid+1
-				if prev!='':
+				try:
+					next[0]=next[0].lower()
+					p_multi_ind=0
+					c_multi_ind=0
+					p_multi_ind_th=0
+					c_multi_th=0
+					#print next[0]
+					#tokenid=tokenid+1
+					if prev!='':
 
-					if counter==2:
-						label = key+'__'+str(prev[1]['CharacterOffsetBegin'])
+						if counter==2:
+							label = key+'__'+str(prev[1]['CharacterOffsetBegin'])
 									
-						pwlabels='dummy'
+							pwlabels='dummy'
 
-						if (prev[0] in connectivelist) or (prev[0]+' '+current[0] in connectivelist) or (prev[0]+' '+current[0]+' '+next[0] in connectivelist):
+							if (prev[0] in connectivelist) or (prev[0]+' '+current[0] in connectivelist) or (prev[0]+' '+current[0]+' '+next[0] in connectivelist):
 					
-							if prev[0]+' '+current[0] in connectivelist:
-								prev[0]=prev[0]+' '+current[0]
-								p_multi_ind=1
-								p_multi_ind_th=0
-							elif prev[0]+' '+current[0]+' '+next[0] in connectivelist:
-								prev[0]=prev[0]+' '+current[0]+' '+next[0]
-								p_multi_ind_th=1
-								p_multi_ind=0
-							else:
-								p_multi_ind=0
-								p_multi_ind_th=0
+								if prev[0]+' '+current[0] in connectivelist:
+									prev[0]=prev[0]+' '+current[0]
+									p_multi_ind=1
+									p_multi_ind_th=0
+								elif prev[0]+' '+current[0]+' '+next[0] in connectivelist:
+									prev[0]=prev[0]+' '+current[0]+' '+next[0]
+									p_multi_ind_th=1
+									p_multi_ind=0
+								else:
+									p_multi_ind=0
+									p_multi_ind_th=0
 					
-							if lpind==0:
-								crp=current_to_root((counter-2),ptree)
-								self_cat=self_category((counter-2),ptree)
-								parent_cat=parent_category((counter-2),ptree)
-								left_sib=left_sibling((counter-2),ptree)
-								right_sib=right_sibling((counter-2),ptree)
-								parent_cat_link=parent_category_linked((counter-2),ptree)
-								right_cat_link=parent_category_linked((counter-2),ptree)
-								left_sib_n=left_sibling_n((counter-2),ptree)
-								right_sib_n=right_sibling_n((counter-2),ptree)				
-							else:
-								crp='0'
-								self_cat='0'
-								parent_cat='0'
-								left_sib='0'
-								right_sib='0'
-								parent_cat_link='0'
-								right_cat_link='0'
+								if lpind==0:
+									crp=current_to_root((counter-2),ptree)
+									self_cat=self_category((counter-2),ptree)
+									parent_cat=parent_category((counter-2),ptree)
+									left_sib=left_sibling((counter-2),ptree)
+									right_sib=right_sibling((counter-2),ptree)
+									parent_cat_link=parent_category_linked((counter-2),ptree)
+									right_cat_link=parent_category_linked((counter-2),ptree)
+									left_sib_n=left_sibling_n((counter-2),ptree)
+									right_sib_n=right_sibling_n((counter-2),ptree)				
+								else:
+									crp='0'
+									self_cat='0'
+									parent_cat='0'
+									left_sib='0'
+									right_sib='0'
+									parent_cat_link='0'
+									right_cat_link='0'
 
-								left_sib_n='0'
-								right_sib_n='0'				
+									left_sib_n='0'
+									right_sib_n='0'				
 
-							tagdata={0:prev[1]['PartOfSpeech'], 1:'_'+prev[0], 2:'_', 3:'_'+prev[1]['PartOfSpeech'], 4:prev[0]+'_'+current[0], 5:current[1]['PartOfSpeech'], 6:prev[1]['PartOfSpeech']+'_'+current[1]['PartOfSpeech'], 7:crp, 8:prev[0], 9:self_cat, 10:left_sib_n, 11:right_sib_n, 12:parent_cat, 13:self_cat+'_'+left_sib_n,14:self_cat+'_'+right_sib_n,15:self_cat+'_'+parent_cat,16:left_sib_n+'_'+right_sib_n,17:left_sib_n+'_'+parent_cat,18:right_sib_n+'_'+parent_cat ,19:right_cat_link, 20:parent_cat_link}#
-							allDevData.append((tagdata,pwlabels))
-							if p_multi_ind==1:
-								identifierdev.append({'docID':key, 'tokenId':[tokenid-2,tokenid-1], 'sentid':sentid, 'senttokenid':[counter-2,counter-1], 'characterOffsetBegin': prev[1]['CharacterOffsetBegin'] ,'characterOffsetEnd': prev[1]['CharacterOffsetEnd'], 'word':prev[0]})
-							elif p_multi_ind_th==1:
-								identifierdev.append({'docID':key, 'tokenId':[tokenid-2,tokenid-1,tokenid], 'sentid':sentid, 'senttokenid':[counter-2,counter-1,counter], 'characterOffsetBegin': prev[1]['CharacterOffsetBegin'] ,'characterOffsetEnd': prev[1]['CharacterOffsetEnd'], 'word':prev[0]})
-							else:
-								identifierdev.append({'docID':key, 'tokenId':[tokenid-2], 'sentid':sentid, 'senttokenid':[counter-2], 'characterOffsetBegin': prev[1]['CharacterOffsetBegin'] ,'characterOffsetEnd': prev[1]['CharacterOffsetEnd'], 'word':prev[0]})
+								tagdata={0:prev[1]['PartOfSpeech'], 1:'_'+prev[0], 2:'_', 3:'_'+prev[1]['PartOfSpeech'], 4:prev[0]+'_'+current[0], 5:current[1]['PartOfSpeech'], 6:prev[1]['PartOfSpeech']+'_'+current[1]['PartOfSpeech'], 7:crp, 8:prev[0], 9:self_cat, 10:left_sib_n, 11:right_sib_n, 12:parent_cat, 13:self_cat+'_'+left_sib_n,14:self_cat+'_'+right_sib_n,15:self_cat+'_'+parent_cat,16:left_sib_n+'_'+right_sib_n,17:left_sib_n+'_'+parent_cat,18:right_sib_n+'_'+parent_cat ,19:right_cat_link, 20:parent_cat_link}#
+								allDevData.append((tagdata,pwlabels))
+								if p_multi_ind==1:
+									identifierdev.append({'docID':key, 'tokenId':[tokenid-2,tokenid-1], 'sentid':sentid, 'senttokenid':[counter-2,counter-1], 'characterOffsetBegin': prev[1]['CharacterOffsetBegin'] ,'characterOffsetEnd': prev[1]['CharacterOffsetEnd'], 'word':prev[0]})
+								elif p_multi_ind_th==1:
+									identifierdev.append({'docID':key, 'tokenId':[tokenid-2,tokenid-1,tokenid], 'sentid':sentid, 'senttokenid':[counter-2,counter-1,counter], 'characterOffsetBegin': prev[1]['CharacterOffsetBegin'] ,'characterOffsetEnd': prev[1]['CharacterOffsetEnd'], 'word':prev[0]})
+								else:
+									identifierdev.append({'docID':key, 'tokenId':[tokenid-2], 'sentid':sentid, 'senttokenid':[counter-2], 'characterOffsetBegin': prev[1]['CharacterOffsetBegin'] ,'characterOffsetEnd': prev[1]['CharacterOffsetEnd'], 'word':prev[0]})
 
 			
-					label = key+'__'+str(current[1]['CharacterOffsetBegin'])
+						label = key+'__'+str(current[1]['CharacterOffsetBegin'])
 									
-					labels='dummy'			
+						labels='dummy'			
 			
 			
-					if lpind==0:
-						crp=current_to_root((counter-1),ptree)
-						self_cat=self_category((counter-1),ptree)
-						parent_cat=parent_category((counter-1),ptree)
-						left_sib=left_sibling((counter-1),ptree)
-						right_sib=right_sibling((counter-1),ptree)
-						parent_cat_link=parent_category_linked((counter-1),ptree)
-						right_cat_link=parent_category_linked((counter-1),ptree)
+						if lpind==0:
+							crp=current_to_root((counter-1),ptree)
+							self_cat=self_category((counter-1),ptree)
+							parent_cat=parent_category((counter-1),ptree)
+							left_sib=left_sibling((counter-1),ptree)
+							right_sib=right_sibling((counter-1),ptree)
+							parent_cat_link=parent_category_linked((counter-1),ptree)
+							right_cat_link=parent_category_linked((counter-1),ptree)
 
-						left_sib_n=left_sibling_n((counter-1),ptree)
-						right_sib_n=right_sibling_n((counter-1),ptree)				
+							left_sib_n=left_sibling_n((counter-1),ptree)
+							right_sib_n=right_sibling_n((counter-1),ptree)				
 
-					else:
-						crp=0
-						self_cat=0
-						parent_cat=0
-						left_sib=0
-						right_sib=0
-						parent_cat_link=0
-						right_cat_link=0
-
-						left_sib_n=0
-						right_sib_n=0				
-
-					# TOP PAPER with modified sibling feature
-					if (counter+1)<len(sentence['words']):
-						if current[0]+' '+next[0]+' '+sentence['words'][counter+1][0] in connectivelist:
-							current[0]=current[0]+' '+next[0]+' '+sentence['words'][counter+1][0]
-							c_multi_th=1
-							c_multi_ind=0
-			
-					if (current[0] in connectivelist) or (current[0]+' '+next[0] in connectivelist) or (c_multi_th==1):
-
-						if current[0]+' '+next[0] in connectivelist:
-							current[0]=current[0]+' '+next[0]
-							c_multi_ind=1
-							#c_multi_th=0
 						else:
-							c_multi_ind=0
-							#c_multi_th=0
+							crp=0
+							self_cat=0
+							parent_cat=0
+							left_sib=0
+							right_sib=0
+							parent_cat_link=0
+							right_cat_link=0
+
+							left_sib_n=0
+							right_sib_n=0				
+
+						# TOP PAPER with modified sibling feature
+						if (counter+1)<len(sentence['words']):
+							if current[0]+' '+next[0]+' '+sentence['words'][counter+1][0] in connectivelist:
+								current[0]=current[0]+' '+next[0]+' '+sentence['words'][counter+1][0]
+								c_multi_th=1
+								c_multi_ind=0
+			
+						if (current[0] in connectivelist) or (current[0]+' '+next[0] in connectivelist) or (c_multi_th==1):
+
+							if current[0]+' '+next[0] in connectivelist:
+								current[0]=current[0]+' '+next[0]
+								c_multi_ind=1
+								#c_multi_th=0
+							else:
+								c_multi_ind=0
+								#c_multi_th=0
 				
 				
 
-						tagdata={0:current[1]['PartOfSpeech'], 
-1:str(prev[0])+'_'+str(current[0]), 
-2:prev[1]['PartOfSpeech'], 
-3:str(prev[1]['PartOfSpeech'])+'_'+str(current[1]['PartOfSpeech']), 
-4:str(current[0])+'_'+str(next[0]), 
-5:next[1]['PartOfSpeech'], 
-6:str(current[1]['PartOfSpeech'])+'_'+str(next[1]['PartOfSpeech']), 
-7:crp, 
-8:current[0], 
-9:self_cat, 
-10:left_sib_n, 
-11:right_sib_n, 
-12:parent_cat, 
-13:str(self_cat)+'_'+str(left_sib_n),
-14:str(self_cat)+'_'+str(right_sib_n),
-15:str(self_cat)+'_'+str(parent_cat),
-16:str(left_sib_n)+'_'+str(right_sib_n),
-17:str(left_sib_n)+'_'+str(parent_cat),
-18:str(right_sib_n)+'_'+str(parent_cat) ,
-19:right_cat_link, 
-20:parent_cat_link}##
+							tagdata={0:current[1]['PartOfSpeech'], 1:str(prev[0])+'_'+str(current[0]), 2:prev[1]['PartOfSpeech'], 3:str(prev[1]['PartOfSpeech'])+'_'+str(current[1]['PartOfSpeech']), 4:str(current[0])+'_'+str(next[0]), 5:next[1]['PartOfSpeech'], 6:str(current[1]['PartOfSpeech'])+'_'+str(next[1]['PartOfSpeech']), 7:crp, 8:current[0], 9:self_cat, 10:left_sib_n, 11:right_sib_n, 12:parent_cat, 13:str(self_cat)+'_'+str(left_sib_n),14:str(self_cat)+'_'+str(right_sib_n),15:str(self_cat)+'_'+str(parent_cat),16:str(left_sib_n)+'_'+str(right_sib_n),17:str(left_sib_n)+'_'+str(parent_cat),18:str(right_sib_n)+'_'+str(parent_cat) ,19:right_cat_link, 20:parent_cat_link}##
 			
-						allDevData.append((tagdata,labels))
-						if c_multi_ind==1:
-							identifierdev.append({'docID':key, 'tokenId':[tokenid-1,tokenid], 'sentid':sentid, 'senttokenid':[counter-1,counter], 'characterOffsetBegin': current[1]['CharacterOffsetBegin'] ,'characterOffsetEnd': current[1]['CharacterOffsetEnd'], 'word':current[0] })
-						elif c_multi_th==1:
-							identifierdev.append({'docID':key, 'tokenId':[tokenid-1,tokenid,tokenid+1], 'sentid':sentid, 'senttokenid':[counter-1,counter,counter+1], 'characterOffsetBegin': current[1]['CharacterOffsetBegin'] ,'characterOffsetEnd': current[1]['CharacterOffsetEnd'], 'word':current[0] })
-						else:
-							identifierdev.append({'docID':key, 'tokenId':[tokenid-1],  'sentid':sentid, 'senttokenid':[counter-1], 'characterOffsetBegin': current[1]['CharacterOffsetBegin'] ,'characterOffsetEnd': current[1]['CharacterOffsetEnd'], 'word':current[0] })
+							allDevData.append((tagdata,labels))
+							if c_multi_ind==1:
+								identifierdev.append({'docID':key, 'tokenId':[tokenid-1,tokenid], 'sentid':sentid, 'senttokenid':[counter-1,counter], 'characterOffsetBegin': current[1]['CharacterOffsetBegin'] ,'characterOffsetEnd': current[1]['CharacterOffsetEnd'], 'word':current[0] })
+							elif c_multi_th==1:
+								identifierdev.append({'docID':key, 'tokenId':[tokenid-1,tokenid,tokenid+1], 'sentid':sentid, 'senttokenid':[counter-1,counter,counter+1], 'characterOffsetBegin': current[1]['CharacterOffsetBegin'] ,'characterOffsetEnd': current[1]['CharacterOffsetEnd'], 'word':current[0] })
+							else:
+								identifierdev.append({'docID':key, 'tokenId':[tokenid-1],  'sentid':sentid, 'senttokenid':[counter-1], 'characterOffsetBegin': current[1]['CharacterOffsetBegin'] ,'characterOffsetEnd': current[1]['CharacterOffsetEnd'], 'word':current[0] })
 			
 			
 		
-				prev=current
-				current=next
-		
-			label = key+'__'+str(next[1]['CharacterOffsetBegin'])
+					prev=current
+					current=next
+				except:
+					print "error, skipping word"
+					iserror=1
+					continue
+				if iserror==0:
+					label = key+'__'+str(next[1]['CharacterOffsetBegin'])
 			
-			labels='dummy'
+					labels='dummy'
 	
-			if next[0] in connectivelist:
+					if next[0] in connectivelist:
 		
-				if lpind==0:
-					crp=current_to_root((counter),ptree)
-					self_cat=self_category((counter),ptree)
-					parent_cat=parent_category((counter),ptree)
-					left_sib=left_sibling((counter),ptree)
-					right_sib=right_sibling((counter),ptree)
-					parent_cat_link=parent_category_linked((counter),ptree)
-					right_cat_link=parent_category_linked((counter),ptree)
+						if lpind==0:
+							crp=current_to_root((counter),ptree)
+							self_cat=self_category((counter),ptree)
+							parent_cat=parent_category((counter),ptree)
+							left_sib=left_sibling((counter),ptree)
+							right_sib=right_sibling((counter),ptree)
+							parent_cat_link=parent_category_linked((counter),ptree)
+							right_cat_link=parent_category_linked((counter),ptree)
 
-					left_sib_n=left_sibling_n((counter),ptree)
-					right_sib_n=right_sibling_n((counter),ptree)				
-				else:
-					crp='0'
-					self_cat='0'
-					parent_cat='0'
-					left_sib='0'
-					right_sib='0'
-					parent_cat_link='0'
-					right_cat_link='0'
+							left_sib_n=left_sibling_n((counter),ptree)
+							right_sib_n=right_sibling_n((counter),ptree)				
+						else:
+							crp='0'
+							self_cat='0'
+							parent_cat='0'
+							left_sib='0'
+							right_sib='0'
+							parent_cat_link='0'
+							right_cat_link='0'
 
-					left_sib_n='0'
-					right_sib_n='0'
-				tagdata={0:next[1]['PartOfSpeech'], 1:current[0]+'_'+next[0], 2:current[1]['PartOfSpeech'], 3:current[1]['PartOfSpeech']+'_'+next[1]['PartOfSpeech'], 4:next[0]+'_', 5:'_', 6:next[1]['PartOfSpeech']+'_', 7:crp, 8:next[0], 9:self_cat, 10:left_sib_n, 11:right_sib_n, 12:parent_cat, 13:self_cat+'_'+left_sib_n,14:self_cat+'_'+right_sib_n,15:self_cat+'_'+parent_cat,16:left_sib_n+'_'+right_sib_n,17:left_sib_n+'_'+parent_cat,18:right_sib_n+'_'+parent_cat ,19:right_cat_link, 20:parent_cat_link}###
+							left_sib_n='0'
+							right_sib_n='0'
+						tagdata={0:next[1]['PartOfSpeech'], 1:current[0]+'_'+next[0], 2:current[1]['PartOfSpeech'], 3:current[1]['PartOfSpeech']+'_'+next[1]['PartOfSpeech'], 4:next[0]+'_', 5:'_', 6:next[1]['PartOfSpeech']+'_', 7:crp, 8:next[0], 9:self_cat, 10:left_sib_n, 11:right_sib_n, 12:parent_cat, 13:self_cat+'_'+left_sib_n,14:self_cat+'_'+right_sib_n,15:self_cat+'_'+parent_cat,16:left_sib_n+'_'+right_sib_n,17:left_sib_n+'_'+parent_cat,18:right_sib_n+'_'+parent_cat ,19:right_cat_link, 20:parent_cat_link}###
 		
-				allDevData.append((tagdata,labels))
+						allDevData.append((tagdata,labels))
 		
-				identifierdev.append({'docID':key, 'tokenId':[tokenid],  'sentid':sentid, 'senttokenid':[counter], 'characterOffsetBegin': current[1]['CharacterOffsetBegin'] ,'characterOffsetEnd': current[1]['CharacterOffsetEnd'], 'word':current[0] }) 
-
+						identifierdev.append({'docID':key, 'tokenId':[tokenid],  'sentid':sentid, 'senttokenid':[counter], 'characterOffsetBegin': current[1]['CharacterOffsetBegin'] ,'characterOffsetEnd': current[1]['CharacterOffsetEnd'], 'word':current[0] }) 
+					
 	return (allDevData,identifierdev)
 
 #===================================================================================================================================

@@ -357,7 +357,8 @@ def readInput(relationFilePath, parseFilePath, trainOrTest):
     pdtb_file = codecs.open(relationFilePath, encoding='utf8');
     relations = [json.loads(x) for x in pdtb_file];
     print("Done");
-    
+    sys.stderr.write("Number of Input Relations: " + str(len(relations))); 
+    sys.exit();
     #Read parses.json
     print ("Reading parses.json");
     parse_file = codecs.open(parseFilePath, encoding='utf8')
@@ -694,8 +695,14 @@ def exportUpdatedRelations(lbjOutput, updatedRelationsFile):
                   
     with open(updatedRelationsFile, 'w') as f:
         for item in goldList:
-            json.dump(item, f)
-            f.write("\n");
+            try:
+                json.dump(item, f)
+                f.write("\n")
+            except:
+                exc_type, exc_obj, exc_tb = sys.exc_info()
+                fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+                sys.stderr.write(exc_type + '\t' + fname + '\t' + exc_tb.tb_lineno)
+                continue
 
 def getTokenList(arg):
     tokenList = []
@@ -834,4 +841,3 @@ if __name__ == '__main__':
     exportUpdatedRelations(LBJPredictionFile, updatedRelationsFile)
     
     print "Done";
-

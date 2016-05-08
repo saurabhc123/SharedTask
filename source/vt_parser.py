@@ -73,7 +73,7 @@ if __name__ == '__main__':
     output_dir = sys.argv[2]
     input_folder = os.path.dirname(os.path.abspath(input_parses_file))
     parser = DiscourseParser()
-    parser.run_connective_classifier(input_parses_file, output_dir)
+    #parser.run_connective_classifier(input_parses_file, output_dir)
     parser.run_explicit_args_extractor(input_parses_file, output_dir)
     parser.run_ps_arg1_extractor(input_parses_file, output_dir)
     parser.run_ps_arg2_extractor(input_parses_file, output_dir)

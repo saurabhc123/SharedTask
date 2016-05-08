@@ -16,13 +16,14 @@ curDir='/'.join(terms[:-1])
 relationsFile=argv[1]
 parsesFile=argv[2]
 relationsF=codecs.open(relationsFile, encoding='utf8')
+#sys.stderr.write("Number of Input Relations to PSArg1: " + str(len(relationsF)));
 #relationsF=open(relationsFile)
 parsesF=codecs.open(parsesFile, encoding='utf8')
 #parsesF=open(parsesFile)
 outF=open(argv[3],'w')
 parseDict=json.load(parsesF)
 relations = [json.loads(x) for x in relationsF]
-
+sys.stderr.write("Number of Input Relations to PSArg1: " + str(len(relations)));
 #verbListF=open("resources/verbList.txt",'r')
 verbListF=open(curDir+"/resources/verbList.txt",'r')
 verbList={}
@@ -98,7 +99,9 @@ def getAllClauseCombinations(clausesArg1,dictByDocID,relationDict,relID,docID):
 		
 
 def makeDataForArg1PSExplicit(dictByDocID,dictByTokenID,parseDict,relationDict,verbList,relations,outF):
+   omit = 0;
    for relation in relations:
+    try:
 #	sense=relation['Sense'] #this is a list since some examples have multiple senses
 	relType=relation['Type'] #Explicit, Implicit,Entrel,AltLex
 	docID=relation['DocID']
@@ -170,6 +173,10 @@ def makeDataForArg1PSExplicit(dictByDocID,dictByTokenID,parseDict,relationDict,v
 	         outF.write("\n")
 	      print '**************************************************'	    
 	  #    print
+    except:
+     omit = omit + 1;
+     continue
+  sys.stderr.write("Number of processed relations: " + str(omit));
 
 
 def printWords(dictByDocID,docID,sentID,wordIDs):

@@ -29,17 +29,17 @@ class DiscourseParser(object):
     def run_connective_classifier(self, input_parses_file, output_path):
         output_relations_file = output_path + self.explicit_connective_output_file_name
         explicitconnective.evaluate_connective_classifier_maxent2.main(input_parses_file, output_relations_file)
-
+    
     def run_explicit_args_extractor(self,input_parses_file ,output_path):
         input_relations_file = output_path + self.explicit_connective_output_file_name
         output_relations_file = output_path + self.explicit_args_output_file_name
         os.system("explicit_args/runExplicitArgs.sh %s %s %s %s" % (input_relations_file, input_parses_file, ".", output_relations_file))
-
+        
     def run_ps_arg1_extractor(self,input_parses_file, output_path):
         input_relations_file = output_path + self.explicit_args_output_file_name
         output_relations_file = output_path + self.ps_arg1_extractor_output_file_name
         return os.system("PSArg1/runPSArg1Test.sh %s %s %s" % (input_relations_file, input_parses_file, output_relations_file))
-
+       
     def run_ps_arg2_extractor(self,input_parses_file, output_path):
         input_relations_file = output_path + self.ps_arg1_extractor_output_file_name
         output_relations_file = output_path + self.ps_arg2_extractor_output_file_name
@@ -54,22 +54,22 @@ class DiscourseParser(object):
         input_relations_file = output_path + self.explicit_sense_output_file_name
         output_relations_file = output_path + self.implicit_adjacent_sentences_output_file_name
         implicit_sense_xz.extract_adjacent_sentences.produceRelationsFile(input_relations_file, input_parses_file, input_folder  , output_relations_file )
-
+        
     def run_implicit_sense_classifierPass1(self, input_parses_file, output_path):
         input_relations_file = output_path + self.implicit_adjacent_sentences_output_file_name
         output_relations_file = output_path + self.implicit_sense_output_file_name
         implicit_sense.ImplicitSense.implicitSense(input_relations_file, input_parses_file, output_relations_file)
-
+        
     def run_implicit_args_extractor(self, input_parses_file, output_path):
         input_relations_file = output_path + self.implicit_sense_output_file_name
         output_relations_file = output_path + self.implicit_args_output_file_name
         implicit_args.argumentClassifier.extract_implicit_arguments(input_relations_file, input_parses_file, output_relations_file)
-    
+        
     def run_implicit_sense_classifierPass2(self, input_parses_file, output_path):
         input_relations_file = output_path + self.implicit_args_output_file_name
         output_relations_file = output_path + self.final_output_file_name
         implicit_sense.ImplicitSense.implicitSense(input_relations_file, input_parses_file, output_relations_file)
-
+        
 if __name__ == '__main__':
     input_parses_file = sys.argv[1]+ "/parses.json";
     output_dir = sys.argv[3]
@@ -82,8 +82,8 @@ if __name__ == '__main__':
     parser.run_ps_arg1_extractor(input_parses_file, output_dir)
     parser.run_ps_arg2_extractor(input_parses_file, output_dir)
     parser.run_explicit_sense_classifier(input_parses_file, output_dir)
-    parser.run_implicit_adjacent_sentence_classifier(input_parses_file, output_dir, input_folder ) 
-    parser.run_implicit_sense_classifierPass1(input_parses_file, output_dir)
-    parser.run_implicit_args_extractor(input_parses_file, output_dir)
-    parser.run_implicit_sense_classifierPass2(input_parses_file, output_dir)
-    os.system("/home/VTNLPS16/SharedTask/output/convertRelationOutput.py %s/output_relations.json %s/output.json" % (output_dir, output_dir))
+    #parser.run_implicit_adjacent_sentence_classifier(input_parses_file, output_dir, input_folder ) 
+    #parser.run_implicit_sense_classifierPass1(input_parses_file, output_dir)
+    #parser.run_implicit_args_extractor(input_parses_file, output_dir)
+    #parser.run_implicit_sense_classifierPass2(input_parses_file, output_dir)
+    #os.system("/home/VTNLPS16/SharedTask/output/convertRelationOutput.py %s/output_relations.json %s/output.json" % (output_dir, output_dir))
