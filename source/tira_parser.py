@@ -77,13 +77,16 @@ if __name__ == '__main__':
     print "Output Dir: ", output_dir;
     input_folder = os.path.dirname(os.path.abspath(input_parses_file)) + '/raw';
     parser = DiscourseParser()
+    clean_input_file_name = "cleanParses.json"
+    os.system("python try.py %s > %s" % (input_parses_file, clean_input_file_name))
+    input_parses_file = clean_input_file_name
     parser.run_connective_classifier(input_parses_file, output_dir)
-    parser.run_explicit_args_extractor(input_parses_file, output_dir)
-    parser.run_ps_arg1_extractor(input_parses_file, output_dir)
-    parser.run_ps_arg2_extractor(input_parses_file, output_dir)
-    parser.run_explicit_sense_classifier(input_parses_file, output_dir)
-    parser.run_implicit_adjacent_sentence_classifier(input_parses_file, output_dir, input_folder ) 
-    parser.run_implicit_sense_classifierPass1(input_parses_file, output_dir)
-    parser.run_implicit_args_extractor(input_parses_file, output_dir)
-    parser.run_implicit_sense_classifierPass2(input_parses_file, output_dir)
+    #parser.run_explicit_args_extractor(input_parses_file, output_dir)
+    #parser.run_ps_arg1_extractor(input_parses_file, output_dir)
+    #parser.run_ps_arg2_extractor(input_parses_file, output_dir)
+    #parser.run_explicit_sense_classifier(input_parses_file, output_dir)
+    #parser.run_implicit_adjacent_sentence_classifier(input_parses_file, output_dir, input_folder ) 
+    #parser.run_implicit_sense_classifierPass1(input_parses_file, output_dir)
+    #parser.run_implicit_args_extractor(input_parses_file, output_dir)
+    #parser.run_implicit_sense_classifierPass2(input_parses_file, output_dir)
     os.system("/home/VTNLPS16/SharedTask/output/convertRelationOutput.py %s/output_relations.json %s/output.json" % (output_dir, output_dir))
