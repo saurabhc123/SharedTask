@@ -55,7 +55,7 @@ def prune(featureIndex, dataset):
 def implicitSenseExample():
    trainingParses = '/home/jtk0/competition2/development/data/conll16st-en-01-12-16-train/parses.json'
    trainingRelations = '/home/jtk0/competition2/development/data/conll16st-en-01-12-16-train/relations.json'
-   myDirectory ='/home/jtk0/competition3/SharedTask/source/implicit_sense'
+   myDirectory ='/home/jtk0/competition4/SharedTask/source/implicit_sense'#'/home/jtk0/competition3/SharedTask/source/implicit_sense'
    
    testingParses = '/home/jtk0/competition2/development/data/conll16st-en-01-12-16-dev/parses.json'
 #   testingRelations = '/home/jtk0/competition2/development/data/conll16st-en-01-12-16-dev/relations.json'
@@ -69,7 +69,8 @@ def implicitSense(testingRelations,testingParses, result):
   relationOrResult = "relation"
   trainingParses='/home/jtk0/competition2/development/data/conll16st-en-01-12-16-train/parses.json'
   trainingRelation = '/home/jtk0/competition2/development/data/conll16st-en-01-12-16-train/relations.json'
-  myDirectory ='implicit_sense/'#/home/jtk0/competition3/SharedTask/source/implicit_sense/'
+  #myDirectory ='/home/jtk0/competition4/SharedTask/source/implicit_sense/'#'implicit_sense/'#/home/jtk0/competition3/SharedTask/source/implicit_sense/'
+  myDirectory = 'implicit_sense/'
   classifier=training(trainingParses, trainingRelation, myDirectory)
   testing(classifier, testingParses, testingRelations,myDirectory,result,relationOrResult)
   return classifier
@@ -114,6 +115,8 @@ def training( parsesPath, relationsPath, myDirectory):
         counter = 0
         classifier = None
         for relation in relations:
+            if relation["Sense"][0] == "Expansion" or  relation["Sense"][0] == "Temporal" or  relation["Sense"][0] == "Contingency" or  relation["Sense"][0] == "Comparison":
+              continue
             if relation['Type'] == 'Implicit' or relation['Type'] == 'AltLex' or relation['Type'] == "EntRel":
                 if counter%100==0 and counter>0:
                   print counter
@@ -124,8 +127,8 @@ def training( parsesPath, relationsPath, myDirectory):
                 features.update(finalBCDict)
                 features.update(bc.bcOneLinePairDataSecondIteration(relation,baseBCDict,finalBCDict, parses))
 
-#                features.update(finalBCArgsDict)
-#                features.update(bca.bcOneLineArgumentDataSecondIteration(relation,baseBCDict,finalBCArgsDict,parses))
+                features.update(finalBCArgsDict)
+                features.update(bca.bcOneLineArgumentDataSecondIteration(relation,baseBCDict,finalBCArgsDict,parses))
 
                 features.update(prodDict)
                 features.update(pr.bcOneLinePairDataSecondIteration(relation,parses,prodDict))
@@ -208,8 +211,8 @@ def testing(classifier, parses,relations, myDirectory,finalFile,relationOrResult
               features.update(finalBCDict)
               features.update(bc.bcOneLinePairDataSecondIteration(testRelation,baseBCDict,finalBCDict, testingParses))
   
-#              features.update(finalBCArgsDict)
-#              features.update(bca.bcOneLineArgumentDataSecondIteration(testRelation,baseBCDict,finalBCArgsDict, testingParses))
+              features.update(finalBCArgsDict)
+              features.update(bca.bcOneLineArgumentDataSecondIteration(testRelation,baseBCDict,finalBCArgsDict, testingParses))
               
               features.update(prodDict)
               features.update(pr.bcOneLinePairDataSecondIteration(testRelation,testingParses,prodDict))
@@ -220,8 +223,8 @@ def testing(classifier, parses,relations, myDirectory,finalFile,relationOrResult
 #              features.update(finalDRDict)
 #              features.update(dr.bcOneLinePairDataSecondIteration(testRelation,testingParses,finalDRDict))
 
-#            polarityFeatures, polarityKeySet = polarity_feature_extractor.get_polarity_features(testRelation, testingParses)
-#            features.update(polarityFeatures)
+#              polarityFeatures, polarityKeySet = polarity_feature_extractor.get_polarity_features(testRelation, testingParses)
+#              features.update(polarityFeatures)
 
 #--------------------------------           
               result = classifier.classify(features)
@@ -261,8 +264,9 @@ def testing(classifier, parses,relations, myDirectory,finalFile,relationOrResult
             if 'ID' in testRelation:
               finalResult['ID']=testRelation['ID']
             else:
-              finalResult["ID"]=200000+wrong+correct
+              finalResult["ID"]=200000+testingCount
             finalResult["Sense"]= relationSense
+
             if relationSense == ["EntRel"]:
               finalResult["Type"] = "EntRel"
             else:

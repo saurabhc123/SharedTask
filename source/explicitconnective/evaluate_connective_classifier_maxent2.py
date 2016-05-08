@@ -209,7 +209,7 @@ def gen_features(input_file_path):
 								left_sib_n='0'
 								right_sib_n='0'				
 
-							tagdata={0:prev[1]['PartOfSpeech'], 1:'_'+prev[0], 2:'_', 3:'_'+prev[1]['PartOfSpeech'], 4:prev[0]+'_'+current[0], 5:current[1]['PartOfSpeech'], 6:prev[1]['PartOfSpeech']+'_'+current[1]['PartOfSpeech'], 7:crp, 8:prev[0], 9:self_cat, 10:left_sib_n, 11:right_sib_n, 12:parent_cat, 13:self_cat+'_'+left_sib_n,14:self_cat+'_'+right_sib_n,15:self_cat+'_'+parent_cat,16:left_sib_n+'_'+right_sib_n,17:left_sib_n+'_'+parent_cat,18:right_sib_n+'_'+parent_cat ,19:right_cat_link, 20:parent_cat_link}
+							tagdata={0:prev[1]['PartOfSpeech'], 1:'_'+prev[0], 2:'_', 3:'_'+prev[1]['PartOfSpeech'], 4:prev[0]+'_'+current[0], 5:current[1]['PartOfSpeech'], 6:prev[1]['PartOfSpeech']+'_'+current[1]['PartOfSpeech'], 7:crp, 8:prev[0], 9:self_cat, 10:left_sib_n, 11:right_sib_n, 12:parent_cat, 13:self_cat+'_'+left_sib_n,14:self_cat+'_'+right_sib_n,15:self_cat+'_'+parent_cat,16:left_sib_n+'_'+right_sib_n,17:left_sib_n+'_'+parent_cat,18:right_sib_n+'_'+parent_cat ,19:right_cat_link, 20:parent_cat_link}#
 							allDevData.append((tagdata,pwlabels))
 							if p_multi_ind==1:
 								identifierdev.append({'docID':key, 'tokenId':[tokenid-2,tokenid-1], 'sentid':sentid, 'senttokenid':[counter-2,counter-1], 'characterOffsetBegin': prev[1]['CharacterOffsetBegin'] ,'characterOffsetEnd': prev[1]['CharacterOffsetEnd'], 'word':prev[0]})
@@ -267,7 +267,27 @@ def gen_features(input_file_path):
 				
 				
 
-						tagdata={0:current[1]['PartOfSpeech'], 1:prev[0]+'_'+current[0], 2:prev[1]['PartOfSpeech'], 3:prev[1]['PartOfSpeech']+'_'+current[1]['PartOfSpeech'], 4:current[0]+'_'+next[0], 5:next[1]['PartOfSpeech'], 6:current[1]['PartOfSpeech']+'_'+next[1]['PartOfSpeech'], 7:crp, 8:current[0], 9:self_cat, 10:left_sib_n, 11:right_sib_n, 12:parent_cat, 13:self_cat+'_'+left_sib_n,14:self_cat+'_'+right_sib_n,15:self_cat+'_'+parent_cat,16:left_sib_n+'_'+right_sib_n,17:left_sib_n+'_'+parent_cat,18:right_sib_n+'_'+parent_cat ,19:right_cat_link, 20:parent_cat_link}
+						tagdata={0:current[1]['PartOfSpeech'], 
+1:str(prev[0])+'_'+str(current[0]), 
+2:prev[1]['PartOfSpeech'], 
+3:str(prev[1]['PartOfSpeech'])+'_'+str(current[1]['PartOfSpeech']), 
+4:str(current[0])+'_'+str(next[0]), 
+5:next[1]['PartOfSpeech'], 
+6:str(current[1]['PartOfSpeech'])+'_'+str(next[1]['PartOfSpeech']), 
+7:crp, 
+8:current[0], 
+9:self_cat, 
+10:left_sib_n, 
+11:right_sib_n, 
+12:parent_cat, 
+13:str(self_cat)+'_'+str(left_sib_n),
+14:str(self_cat)+'_'+str(right_sib_n),
+15:str(self_cat)+'_'+str(parent_cat),
+16:str(left_sib_n)+'_'+str(right_sib_n),
+17:str(left_sib_n)+'_'+str(parent_cat),
+18:str(right_sib_n)+'_'+str(parent_cat) ,
+19:right_cat_link, 
+20:parent_cat_link}##
 			
 						allDevData.append((tagdata,labels))
 						if c_multi_ind==1:
@@ -310,7 +330,7 @@ def gen_features(input_file_path):
 
 					left_sib_n='0'
 					right_sib_n='0'
-				tagdata={0:next[1]['PartOfSpeech'], 1:current[0]+'_'+next[0], 2:current[1]['PartOfSpeech'], 3:current[1]['PartOfSpeech']+'_'+next[1]['PartOfSpeech'], 4:next[0]+'_', 5:'_', 6:next[1]['PartOfSpeech']+'_', 7:crp, 8:next[0], 9:self_cat, 10:left_sib_n, 11:right_sib_n, 12:parent_cat, 13:self_cat+'_'+left_sib_n,14:self_cat+'_'+right_sib_n,15:self_cat+'_'+parent_cat,16:left_sib_n+'_'+right_sib_n,17:left_sib_n+'_'+parent_cat,18:right_sib_n+'_'+parent_cat ,19:right_cat_link, 20:parent_cat_link}
+				tagdata={0:next[1]['PartOfSpeech'], 1:current[0]+'_'+next[0], 2:current[1]['PartOfSpeech'], 3:current[1]['PartOfSpeech']+'_'+next[1]['PartOfSpeech'], 4:next[0]+'_', 5:'_', 6:next[1]['PartOfSpeech']+'_', 7:crp, 8:next[0], 9:self_cat, 10:left_sib_n, 11:right_sib_n, 12:parent_cat, 13:self_cat+'_'+left_sib_n,14:self_cat+'_'+right_sib_n,15:self_cat+'_'+parent_cat,16:left_sib_n+'_'+right_sib_n,17:left_sib_n+'_'+parent_cat,18:right_sib_n+'_'+parent_cat ,19:right_cat_link, 20:parent_cat_link}###
 		
 				allDevData.append((tagdata,labels))
 		
@@ -382,12 +402,13 @@ def main(parsefile, outputfolder):
 					
 	
 	print "    Writing Scorer-Format Output File to scorerfileconnectiveoutput.json..." 
-	import json
+	
+        import json
 	filename=open("scorerfileconnectiveoutput.json","w")
 	for line in scorerfile:
 		print>>filename, json.dumps(line)
 	filename.close()
-
+        
 	print "    Writing Relations File to relations_from_connective_output.json..."
 	filename=open(outputfolder,"w")
 	for line in relationsfile:
@@ -396,7 +417,7 @@ def main(parsefile, outputfolder):
 
 	print " "
 	print "All Executions Successful..."
-
+        
 
 
 if __name__=='__main__':

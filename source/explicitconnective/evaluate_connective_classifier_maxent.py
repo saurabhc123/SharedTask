@@ -345,7 +345,7 @@ def gen_features(input_file_path, connectivefile):
                                11: right_sib_n, 12: parent_cat, 13: self_cat + '_' + left_sib_n,
                                14: self_cat + '_' + right_sib_n, 15: self_cat + '_' + parent_cat,
                                16: left_sib_n + '_' + right_sib_n, 17: left_sib_n + '_' + parent_cat,
-                               18: right_sib_n + '_' + parent_cat, 19: right_cat_link, 20: parent_cat_link}
+                               18: right_sib_n + '_' + parent_cat, 19: str(right_cat_link), 20: str(parent_cat_link)}
 
                     allDevData.append((tagdata, labels))
 

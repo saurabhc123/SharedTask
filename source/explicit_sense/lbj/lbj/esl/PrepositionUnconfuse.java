@@ -305,7 +305,7 @@ public class PrepositionUnconfuse extends SparseNetworkLearner
     super.initialize(a0, a1);
   }
 
-  public void write(LBJ2.util.ExceptionlessOutputStream a0)
+  public void write(java.io.PrintStream a0)
   {
     if (isClone)
     {
@@ -317,7 +317,7 @@ public class PrepositionUnconfuse extends SparseNetworkLearner
     super.write(a0);
   }
 
-  public void write(java.io.PrintStream a0)
+  public void write(LBJ2.util.ExceptionlessOutputStream a0)
   {
     if (isClone)
     {
@@ -339,6 +339,63 @@ public class PrepositionUnconfuse extends SparseNetworkLearner
     }
 
     super.read(a0);
+  }
+
+  public java.lang.String discreteValue(int[] a0, double[] a1)
+  {
+    if (isClone)
+    {
+      loadInstance();
+      return instance.discreteValue(a0, a1);
+    }
+
+    return super.discreteValue(a0, a1);
+  }
+
+  public LBJ2.classify.Feature featureValue(int[] a0, double[] a1)
+  {
+    if (isClone)
+    {
+      loadInstance();
+      return instance.featureValue(a0, a1);
+    }
+
+    return super.featureValue(a0, a1);
+  }
+
+  public void setParameters(LBJ2.learn.SparseNetworkLearner.Parameters a0)
+  {
+    if (isClone)
+    {
+      loadInstance();
+      instance.setParameters(a0);
+      return;
+    }
+
+    super.setParameters(a0);
+  }
+
+  public LBJ2.learn.Learner.Parameters getParameters()
+  {
+    if (isClone)
+    {
+      loadInstance();
+      return instance.getParameters();
+    }
+
+    return super.getParameters();
+  }
+
+  public void setLTU(LBJ2.learn.LinearThresholdUnit a0)
+  {
+    if (isClone)
+    {
+      loadInstance();
+      instance.setLTU(a0);
+      return;
+    }
+
+    super.setLTU(a0);
   }
 
   public void setLabeler(LBJ2.classify.Classifier a0)
@@ -401,7 +458,7 @@ public class PrepositionUnconfuse extends SparseNetworkLearner
     super.forget();
   }
 
-  public LBJ2.classify.ScoreSet scores(int[] a0, double[] a1)
+  public LBJ2.classify.ScoreSet scores(java.lang.Object a0, java.util.Collection a1)
   {
     if (isClone)
     {
@@ -412,7 +469,7 @@ public class PrepositionUnconfuse extends SparseNetworkLearner
     return super.scores(a0, a1);
   }
 
-  public LBJ2.classify.ScoreSet scores(java.lang.Object a0, java.util.Collection a1)
+  public LBJ2.classify.ScoreSet scores(int[] a0, double[] a1)
   {
     if (isClone)
     {
@@ -432,52 +489,6 @@ public class PrepositionUnconfuse extends SparseNetworkLearner
     }
 
     return super.scores(a0, a1, a2);
-  }
-
-  public void setParameters(LBJ2.learn.SparseNetworkLearner.Parameters a0)
-  {
-    if (isClone)
-    {
-      loadInstance();
-      instance.setParameters(a0);
-      return;
-    }
-
-    super.setParameters(a0);
-  }
-
-  public LBJ2.learn.Learner.Parameters getParameters()
-  {
-    if (isClone)
-    {
-      loadInstance();
-      return instance.getParameters();
-    }
-
-    return super.getParameters();
-  }
-
-  public void setLTU(LBJ2.learn.LinearThresholdUnit a0)
-  {
-    if (isClone)
-    {
-      loadInstance();
-      instance.setLTU(a0);
-      return;
-    }
-
-    super.setLTU(a0);
-  }
-
-  public LBJ2.classify.Feature featureValue(int[] a0, double[] a1)
-  {
-    if (isClone)
-    {
-      loadInstance();
-      return instance.featureValue(a0, a1);
-    }
-
-    return super.featureValue(a0, a1);
   }
 
   public void learn(int[] a0, double[] a1, int[] a2, double[] a3)
@@ -501,17 +512,6 @@ public class PrepositionUnconfuse extends SparseNetworkLearner
     }
 
     return super.classify(a0, a1);
-  }
-
-  public java.lang.String discreteValue(int[] a0, double[] a1)
-  {
-    if (isClone)
-    {
-      loadInstance();
-      return instance.discreteValue(a0, a1);
-    }
-
-    return super.discreteValue(a0, a1);
   }
 
   public void write(java.lang.String a0, java.lang.String a1)
@@ -572,145 +572,26 @@ public class PrepositionUnconfuse extends SparseNetworkLearner
     return super.realValue(a0, a1);
   }
 
-  public int getPrunedLexiconSize()
+  public java.lang.String discreteValue(LBJ2.classify.FeatureVector a0)
   {
     if (isClone)
     {
       loadInstance();
-      return instance.getPrunedLexiconSize();
+      return instance.discreteValue(a0);
     }
 
-    return super.getPrunedLexiconSize();
+    return super.discreteValue(a0);
   }
 
-  public void saveModel()
+  public LBJ2.classify.Feature featureValue(LBJ2.classify.FeatureVector a0)
   {
     if (isClone)
     {
       loadInstance();
-      instance.saveModel();
-      return;
+      return instance.featureValue(a0);
     }
 
-    super.saveModel();
-  }
-
-  public void saveLexicon()
-  {
-    if (isClone)
-    {
-      loadInstance();
-      instance.saveLexicon();
-      return;
-    }
-
-    super.saveLexicon();
-  }
-
-  public void writeModel(java.lang.String a0)
-  {
-    if (isClone)
-    {
-      loadInstance();
-      instance.writeModel(a0);
-      return;
-    }
-
-    super.writeModel(a0);
-  }
-
-  public void writeLexicon(java.lang.String a0)
-  {
-    if (isClone)
-    {
-      loadInstance();
-      instance.writeLexicon(a0);
-      return;
-    }
-
-    super.writeLexicon(a0);
-  }
-
-  public void readModel(java.lang.String a0)
-  {
-    if (isClone)
-    {
-      loadInstance();
-      instance.readModel(a0);
-      return;
-    }
-
-    super.readModel(a0);
-  }
-
-  public void readModel(java.net.URL a0)
-  {
-    if (isClone)
-    {
-      loadInstance();
-      instance.readModel(a0);
-      return;
-    }
-
-    super.readModel(a0);
-  }
-
-  public void readLexicon(java.net.URL a0)
-  {
-    if (isClone)
-    {
-      loadInstance();
-      instance.readLexicon(a0);
-      return;
-    }
-
-    super.readLexicon(a0);
-  }
-
-  public void readLexicon(java.lang.String a0)
-  {
-    if (isClone)
-    {
-      loadInstance();
-      instance.readLexicon(a0);
-      return;
-    }
-
-    super.readLexicon(a0);
-  }
-
-  public void readLabelLexicon(LBJ2.util.ExceptionlessInputStream a0)
-  {
-    if (isClone)
-    {
-      loadInstance();
-      instance.readLabelLexicon(a0);
-      return;
-    }
-
-    super.readLabelLexicon(a0);
-  }
-
-  public LBJ2.learn.Lexicon demandLexicon()
-  {
-    if (isClone)
-    {
-      loadInstance();
-      return instance.demandLexicon();
-    }
-
-    return super.demandLexicon();
-  }
-
-  public java.lang.Object[] getExampleArray(java.lang.Object a0, boolean a1)
-  {
-    if (isClone)
-    {
-      loadInstance();
-      return instance.getExampleArray(a0, a1);
-    }
-
-    return super.getExampleArray(a0, a1);
+    return super.featureValue(a0);
   }
 
   public java.lang.Object[] getExampleArray(java.lang.Object a0)
@@ -724,6 +605,17 @@ public class PrepositionUnconfuse extends SparseNetworkLearner
     return super.getExampleArray(a0);
   }
 
+  public java.lang.Object[] getExampleArray(java.lang.Object a0, boolean a1)
+  {
+    if (isClone)
+    {
+      loadInstance();
+      return instance.getExampleArray(a0, a1);
+    }
+
+    return super.getExampleArray(a0, a1);
+  }
+
   public void setLexicon(LBJ2.learn.Lexicon a0)
   {
     if (isClone)
@@ -734,6 +626,75 @@ public class PrepositionUnconfuse extends SparseNetworkLearner
     }
 
     super.setLexicon(a0);
+  }
+
+  public void setParameters(LBJ2.learn.Learner.Parameters a0)
+  {
+    if (isClone)
+    {
+      loadInstance();
+      instance.setParameters(a0);
+      return;
+    }
+
+    super.setParameters(a0);
+  }
+
+  public LBJ2.classify.ScoreSet scores(LBJ2.classify.FeatureVector a0)
+  {
+    if (isClone)
+    {
+      loadInstance();
+      return instance.scores(a0);
+    }
+
+    return super.scores(a0);
+  }
+
+  public LBJ2.classify.ScoreSet scores(java.lang.Object a0)
+  {
+    if (isClone)
+    {
+      loadInstance();
+      return instance.scores(a0);
+    }
+
+    return super.scores(a0);
+  }
+
+  public void readLexiconOnDemand(java.net.URL a0)
+  {
+    if (isClone)
+    {
+      loadInstance();
+      instance.readLexiconOnDemand(a0);
+      return;
+    }
+
+    super.readLexiconOnDemand(a0);
+  }
+
+  public void readLexiconOnDemand(java.lang.String a0)
+  {
+    if (isClone)
+    {
+      loadInstance();
+      instance.readLexiconOnDemand(a0);
+      return;
+    }
+
+    super.readLexiconOnDemand(a0);
+  }
+
+  public LBJ2.classify.Classifier getLabeler()
+  {
+    if (isClone)
+    {
+      loadInstance();
+      return instance.getLabeler();
+    }
+
+    return super.getLabeler();
   }
 
   public LBJ2.classify.Classifier getExtractor()
@@ -828,7 +789,7 @@ public class PrepositionUnconfuse extends SparseNetworkLearner
     return super.getModelLocation();
   }
 
-  public void setLexiconLocation(java.lang.String a0)
+  public void setLexiconLocation(java.net.URL a0)
   {
     if (isClone)
     {
@@ -840,7 +801,7 @@ public class PrepositionUnconfuse extends SparseNetworkLearner
     super.setLexiconLocation(a0);
   }
 
-  public void setLexiconLocation(java.net.URL a0)
+  public void setLexiconLocation(java.lang.String a0)
   {
     if (isClone)
     {
@@ -897,84 +858,134 @@ public class PrepositionUnconfuse extends SparseNetworkLearner
     return super.emptyClone();
   }
 
-  public LBJ2.classify.ScoreSet scores(LBJ2.classify.FeatureVector a0)
+  public int getPrunedLexiconSize()
   {
     if (isClone)
     {
       loadInstance();
-      return instance.scores(a0);
+      return instance.getPrunedLexiconSize();
     }
 
-    return super.scores(a0);
+    return super.getPrunedLexiconSize();
   }
 
-  public LBJ2.classify.ScoreSet scores(java.lang.Object a0)
+  public void saveModel()
   {
     if (isClone)
     {
       loadInstance();
-      return instance.scores(a0);
-    }
-
-    return super.scores(a0);
-  }
-
-  public void setParameters(LBJ2.learn.Learner.Parameters a0)
-  {
-    if (isClone)
-    {
-      loadInstance();
-      instance.setParameters(a0);
+      instance.saveModel();
       return;
     }
 
-    super.setParameters(a0);
+    super.saveModel();
   }
 
-  public void readLexiconOnDemand(java.lang.String a0)
+  public void saveLexicon()
   {
     if (isClone)
     {
       loadInstance();
-      instance.readLexiconOnDemand(a0);
+      instance.saveLexicon();
       return;
     }
 
-    super.readLexiconOnDemand(a0);
+    super.saveLexicon();
   }
 
-  public void readLexiconOnDemand(java.net.URL a0)
+  public void writeModel(java.lang.String a0)
   {
     if (isClone)
     {
       loadInstance();
-      instance.readLexiconOnDemand(a0);
+      instance.writeModel(a0);
       return;
     }
 
-    super.readLexiconOnDemand(a0);
+    super.writeModel(a0);
   }
 
-  public LBJ2.classify.Classifier getLabeler()
+  public void writeLexicon(java.lang.String a0)
   {
     if (isClone)
     {
       loadInstance();
-      return instance.getLabeler();
+      instance.writeLexicon(a0);
+      return;
     }
 
-    return super.getLabeler();
+    super.writeLexicon(a0);
   }
 
-  public LBJ2.classify.Feature featureValue(LBJ2.classify.FeatureVector a0)
+  public void readModel(java.net.URL a0)
   {
     if (isClone)
     {
       loadInstance();
-      return instance.featureValue(a0);
+      instance.readModel(a0);
+      return;
     }
 
-    return super.featureValue(a0);
+    super.readModel(a0);
+  }
+
+  public void readModel(java.lang.String a0)
+  {
+    if (isClone)
+    {
+      loadInstance();
+      instance.readModel(a0);
+      return;
+    }
+
+    super.readModel(a0);
+  }
+
+  public void readLexicon(java.net.URL a0)
+  {
+    if (isClone)
+    {
+      loadInstance();
+      instance.readLexicon(a0);
+      return;
+    }
+
+    super.readLexicon(a0);
+  }
+
+  public void readLexicon(java.lang.String a0)
+  {
+    if (isClone)
+    {
+      loadInstance();
+      instance.readLexicon(a0);
+      return;
+    }
+
+    super.readLexicon(a0);
+  }
+
+  public void readLabelLexicon(LBJ2.util.ExceptionlessInputStream a0)
+  {
+    if (isClone)
+    {
+      loadInstance();
+      instance.readLabelLexicon(a0);
+      return;
+    }
+
+    super.readLabelLexicon(a0);
+  }
+
+  public LBJ2.learn.Lexicon demandLexicon()
+  {
+    if (isClone)
+    {
+      loadInstance();
+      return instance.demandLexicon();
+    }
+
+    return super.demandLexicon();
   }
 
   public void learn(LBJ2.classify.FeatureVector[] a0)
@@ -1001,7 +1012,7 @@ public class PrepositionUnconfuse extends SparseNetworkLearner
     super.learn(a0);
   }
 
-  public LBJ2.classify.FeatureVector[] classify(LBJ2.classify.FeatureVector[] a0)
+  public LBJ2.classify.FeatureVector classify(LBJ2.classify.FeatureVector a0)
   {
     if (isClone)
     {
@@ -1012,7 +1023,7 @@ public class PrepositionUnconfuse extends SparseNetworkLearner
     return super.classify(a0);
   }
 
-  public LBJ2.classify.FeatureVector classify(LBJ2.classify.FeatureVector a0)
+  public LBJ2.classify.FeatureVector[] classify(LBJ2.classify.FeatureVector[] a0)
   {
     if (isClone)
     {
@@ -1032,17 +1043,6 @@ public class PrepositionUnconfuse extends SparseNetworkLearner
     }
 
     return super.classify(a0);
-  }
-
-  public java.lang.String discreteValue(LBJ2.classify.FeatureVector a0)
-  {
-    if (isClone)
-    {
-      loadInstance();
-      return instance.discreteValue(a0);
-    }
-
-    return super.discreteValue(a0);
   }
 
   public static class Parameters extends SparseNetworkLearner.Parameters

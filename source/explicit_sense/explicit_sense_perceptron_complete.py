@@ -364,7 +364,6 @@ def readInput(relationFilePath, parseFilePath, trainOrTest):
     print ("Done");
     
     counter = 0;
-    flag = 0;
 
     countOfExplicit = 0;
     multiWordConn = 0;
@@ -380,6 +379,11 @@ def readInput(relationFilePath, parseFilePath, trainOrTest):
                 for sense in relation['Sense']:
                     print "---[" + sense + "]"
             label = relation['Sense'][0]
+            
+            if trainOrTest == 'train':
+                labelLevel = len(label.split('.'))
+                if labelLevel < 2:
+                    continue
             
             #Ignore relations with invalid senses
 #             if not label in validator.EN_SENSES:
@@ -431,7 +435,11 @@ def readInput(relationFilePath, parseFilePath, trainOrTest):
             features['f04'] = prev_1
             
             #Feature 5: Next Word
-            next_1 = str(parseObjectArg2['words'][connectiveWordIDs[-1] + 1][0]);
+            nextWordID = connectiveWordIDs[-1] + 1
+            if nextWordID < len(parseObjectArg2['words']):
+                next_1 = str(parseObjectArg2['words'][nextWordID][0]);
+            else:
+                next_1 = ''
             features['f05'] = next_1
             
             #Feature 6: prev_1 + C
@@ -566,14 +574,7 @@ def readInput(relationFilePath, parseFilePath, trainOrTest):
                 features['f29'] = preConnPOSs
             
             
-#             instanceID = 'DocID-' + str(relation_DocID) + ':SentID-' + str(parseJSON_sentence_number_arg2) + ':RelID-' + str(counter)
-            if flag >= 0 and flag < 20:
-                print "\nRelation[" + str(counter) + "]:"
-                print "Raw String: " + relation['Arg2']['RawText'];
-                print "Connective Words: " + strConnectiveWords;
-                print "Features: " + str(features);
-                flag += 1;
-            
+#             instanceID = 'DocID-' + str(relation_DocID) + ':SentID-' + str(parseJSON_sentence_number_arg2) + ':RelID-' + str(counter)   
             if(trainOrTest == 'train'):
                 trainingSet.append((features, label));
             else:
