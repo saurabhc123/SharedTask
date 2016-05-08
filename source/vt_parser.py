@@ -20,7 +20,8 @@ class DiscourseParser(object):
     explicit_args_output_file_name = "explicit_args_relations.json"
     explicit_sense_output_file_name = "explicit_sense_relations.json"
     implicit_sense_output_file_name = "implicit_sense_relations.json"
-    implicit_args_output_file_name = "implicit_args_relations.json"
+    implicit_arg1_output_file_name = "implicit_args1_relations.json"
+    implicit_arg2_output_file_name = "implicit_args2_relations.json"
     explicit_sense_lbj_folder = "explicit_sense/lbj"
     implicit_adjacent_sentences_output_file_name = "implicit_adjacent_sentences_relations.json"
 
@@ -57,14 +58,19 @@ class DiscourseParser(object):
         input_relations_file = output_path + self.implicit_adjacent_sentences_output_file_name
         output_relations_file = output_path + self.implicit_sense_output_file_name
         implicit_sense.ImplicitSense.implicitSense(input_relations_file, input_parses_file, output_relations_file)
-
-    def run_implicit_args_extractor(self, input_parses_file, output_path):
-        input_relations_file = output_path + self.implicit_sense_output_file_name
-        output_relations_file = output_path + self.implicit_args_output_file_name
+ 
+    def run_implicit_args1_extractor(self,input_parses_file ,output_path):
+        input_relations_file = output_path + self.implicit_sense_output_file_name 
+        output_relations_file = output_path + self.implicit_arg1_output_file_name
+        return os.system("implArg1/runImplArg1Test.sh %s %s %s" % (input_relations_file, input_parses_file, output_relations_file))
+ 
+    def run_implicit_args2_extractor(self, input_parses_file, output_path):
+        input_relations_file = output_path + self.implicit_arg1_output_file_name
+        output_relations_file = output_path + self.implicit_arg2_output_file_name
         implicit_args.argumentClassifier.extract_implicit_arguments(input_relations_file, input_parses_file, output_relations_file)
     
     def run_implicit_sense_classifierPass2(self, input_parses_file, output_path):
-        input_relations_file = output_path + self.implicit_args_output_file_name
+        input_relations_file = output_path + self.implicit_arg2_output_file_name
         output_relations_file = output_path + self.final_output_file_name
         implicit_sense.ImplicitSense.implicitSense(input_relations_file, input_parses_file, output_relations_file)
 
@@ -73,12 +79,13 @@ if __name__ == '__main__':
     output_dir = sys.argv[2]
     input_folder = os.path.dirname(os.path.abspath(input_parses_file))
     parser = DiscourseParser()
-    parser.run_connective_classifier(input_parses_file, output_dir)
-    parser.run_explicit_args_extractor(input_parses_file, output_dir)
-    parser.run_ps_arg1_extractor(input_parses_file, output_dir)
-    parser.run_ps_arg2_extractor(input_parses_file, output_dir)
-    parser.run_explicit_sense_classifier(input_parses_file, output_dir)
-    parser.run_implicit_adjacent_sentence_classifier(input_parses_file, output_dir, input_folder ) 
-    parser.run_implicit_sense_classifierPass1(input_parses_file, output_dir)
-    parser.run_implicit_args_extractor(input_parses_file, output_dir)
+    #parser.run_connective_classifier(input_parses_file, output_dir)
+    #parser.run_explicit_args_extractor(input_parses_file, output_dir)
+    #parser.run_ps_arg1_extractor(input_parses_file, output_dir)
+    #parser.run_ps_arg2_extractor(input_parses_file, output_dir)
+    #parser.run_explicit_sense_classifier(input_parses_file, output_dir)
+    #parser.run_implicit_adjacent_sentence_classifier(input_parses_file, output_dir, input_folder ) 
+    #parser.run_implicit_sense_classifierPass1(input_parses_file, output_dir)
+    parser.run_implicit_args1_extractor(input_parses_file, output_dir)
+    parser.run_implicit_args2_extractor(input_parses_file, output_dir)
     parser.run_implicit_sense_classifierPass2(input_parses_file, output_dir)
