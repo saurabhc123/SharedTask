@@ -594,8 +594,6 @@ class argumentClassifier:
                 connective = relation['Connective']
                 id = relation['ID']
                 if connectiveType != 'Implicit':
-                    arg1TokenList = list(
-                        map(lambda tokenList: self.generateTokenListForOutput(tokenList), relation['Arg1']['TokenList']));
                     arg2TokenList = list(
                         map(lambda tokenList: self.generateTokenListForOutput(tokenList), relation['Arg2']['TokenList']));
 
@@ -604,38 +602,23 @@ class argumentClassifier:
 		    exampleCount = exampleCount + 1
                     if arg1SentenceNumber == arg2SentenceNumber:
                         f2 = 0;
-                        arg1TokenList = list(map(lambda tokenList: self.generateTokenListForOutput(tokenList),
-                                                 relation['Arg1']['TokenList']));
                         arg2TokenList = list(map(lambda tokenList: self.generateTokenListForOutput(tokenList),
                                                  relation['Arg2']['TokenList']));
                     elif arg2SentenceNumber - arg1SentenceNumber == 1:
-                        arg1Sentence = parsedData.documents[relationDocId][arg1SentenceNumber];
                         arg2Sentence = parsedData.documents[relationDocId][arg2SentenceNumber];
-                        arg1TokenList = self.getPredictedTokenListForSentence(arg1Sentence, arg1Classifier, "Arg1");
                         arg2TokenList = self.getPredictedTokenListForSentence(arg2Sentence, arg2Classifier, "Arg2");
-                        # arg1TokenList = list(map(lambda tokenList: self.generateTokenListForOutput(tokenList), relation['Arg1']['TokenList']));
                         # arg2TokenList = list(map(lambda tokenList: self.generateTokenListForOutput(tokenList), relation['Arg2']['TokenList']));
 
-                        arg1WordList = map(
-                                lambda tokenIndex: arg1Sentence.words[tokenIndex - arg1Sentence.startTokenIndex].actualWord,
-                                arg1TokenList)
                         arg2WordList = map(
                                     lambda tokenIndex: arg2Sentence.words[tokenIndex - arg2Sentence.startTokenIndex].actualWord,
                                     arg2TokenList)
 
 
 
-                        if len(arg1TokenList) == 0:
-                            arg1WordList = map(lambda word: word.actualWord, arg1Sentence.words)
 
                         if len(arg2TokenList) == 0:
                             arg2WordList = map(lambda word: word.actualWord, arg2Sentence.words)
 
-                        if arg1WordList:
-                            if (arg1WordList[len(arg1WordList) - 1]) in punctuation:
-                                arg1WordList.pop(-1);
-                                if len(arg1TokenList) != 0:
-                                    arg1TokenList.pop(-1);
 
                         if arg2WordList:
                             if (arg2WordList[len(arg2WordList) - 1]) in punctuation:
@@ -643,27 +626,13 @@ class argumentClassifier:
                                 if len(arg2TokenList) != 0:
                                     arg2TokenList.pop(-1);
 
-                        if len(arg1TokenList) == 0:
-                            for i in range(arg1Sentence.startTokenIndex , arg1Sentence.startTokenIndex + len(arg1WordList), 1):
-                                arg1TokenList.append(i);
-
-                        if len(arg2TokenList) == 0:
-                            for i in range(arg2Sentence.startTokenIndex , arg2Sentence.startTokenIndex + len(arg2WordList), 1):
                                 arg2TokenList.append(i);
                     else:
-                        arg1TokenList = list(map(lambda tokenList: self.generateTokenListForOutput(tokenList),
-                                                 relation['Arg1']['TokenList']));
                         arg2TokenList = list(map(lambda tokenList: self.generateTokenListForOutput(tokenList),
                                                  relation['Arg2']['TokenList']));
 
-                    arg1RelationsTokenList = []
                     arg2RelationsTokenList = []
 
-                    for argToken in arg1TokenList:
-                        if argToken - arg1Sentence.startTokenIndex < 0:
-                            print "Non subsequent implicit sentences found -> Arg1"
-                            continue
-                        arg1RelationsTokenList.append([0, 0, argToken, arg1SentenceNumber, argToken - arg1Sentence.startTokenIndex]);
                     for argToken in arg2TokenList:
                         if argToken - arg2Sentence.startTokenIndex < 0:
                             print "Non subsequent implicit sentences found -> Arg2"
@@ -671,7 +640,6 @@ class argumentClassifier:
                             continue
                         arg2RelationsTokenList.append([0, 0, argToken, arg2SentenceNumber, argToken - arg2Sentence.startTokenIndex]);
 
-                    arg1RawText = "".join([('' if word in punctuation else ' ')+word for word in arg1WordList])
                     arg2RawText = "".join([('' if word in punctuation else ' ')+word for word in arg2WordList])
 
                 with open(outputFilename, 'a+') as f:
@@ -817,4 +785,3 @@ def extract_implicit_arguments(input_relations_file, input_parses_file, output_r
     trainedArg2Model = argumentClassifierInstance.get_arg2_model()
     print "Making predictions now for implicit arguments..." + (time.strftime("%I:%M:%S"))
     argumentClassifierInstance.performClassificationOnTest(trainedArg1Model, trainedArg2Model, output_relations_file)
-
