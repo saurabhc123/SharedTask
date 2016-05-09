@@ -56,6 +56,7 @@ def produceNonExplicitRelationCandidates(predictionsF, parsesF, docDir):
 	dictByDocID=func.makeDictByDocID(parses)
 	
 	nonMatchNum = 0
+	exceptNum = 0
 	for DocID in parses.keys():
 		#print
 		relationCount = 0
@@ -69,50 +70,58 @@ def produceNonExplicitRelationCandidates(predictionsF, parsesF, docDir):
 			#print "Doc [" + DocID + "]: Sentence count in parses.json <" + str(len(senList)) + "> does NOT match the count in raw file <" + str(len(senLineDict)) + ">"
 		
 		for sen1ID in range (0, len(senList)-1):
-			sen2ID = sen1ID + 1
-			#Extract a adjacent sentences pair
-			sen1 = senList[sen1ID]
-			sen2 = senList[sen2ID]
+			try:
+				sen2ID = sen1ID + 1
+				#Extract a adjacent sentences pair
+				sen1 = senList[sen1ID]
+				sen2 = senList[sen2ID]
+				
+				#Check whether they are in different paragraphs
+				if toCheckParagraph:				
+					if not inSameParagraph(sen1ID, sen2ID, senLineDict):
+						continue	
+				
+				#Check whether a sentence pair already has explicit relation
+				if isExplicitRelation(sen1ID, sen2ID, DocID, predictions):
+					continue
+				
+				#For valid sentence pairs, create a relation
+				relation = {}
+				
+				#do DocID
+				relation['DocID'] = DocID
+				
+				#do Arg1
+				arg1 = extractArgFields(DocID, sen1, sen1ID, dictByDocID)
+				if len(arg1['TokenList']) < 1:
+					continue
+				relation['Arg1'] = arg1
+				
+				#do Arg2
+				arg2 = extractArgFields(DocID, sen2, sen2ID, dictByDocID)
+				if len(arg2['TokenList']) < 1:
+					continue
+				relation['Arg2'] = arg2
+				
+				#Append relation
+				relationCount += 1
+				relations.append(relation)
 			
-			#Check whether they are in different paragraphs
-			if toCheckParagraph:				
-				if not inSameParagraph(sen1ID, sen2ID, senLineDict):
-					continue	
-			
-			#Check whether a sentence pair already has explicit relation
-			if isExplicitRelation(sen1ID, sen2ID, DocID, predictions):
+			except:
+				exceptNum += 1
 				continue
-			
-			#For valid sentence pairs, create a relation
-			relation = {}
-			
-			#do DocID
-			relation['DocID'] = DocID
-			
-			#do Arg1
-			arg1 = extractArgFields(DocID, sen1, sen1ID, dictByDocID)
-			if len(arg1['TokenList']) < 1:
-				continue
-			relation['Arg1'] = arg1
-			
-			#do Arg2
-			arg2 = extractArgFields(DocID, sen2, sen2ID, dictByDocID)
-			if len(arg2['TokenList']) < 1:
-				continue
-			relation['Arg2'] = arg2
-			
-			#Append relation
-			relationCount += 1
-			relations.append(relation)
 		#print 'Create ' + str(relationCount) + ' non-explicit relations out of ' + str(len(senList)) + ' sentences from Doc [' + DocID + ']'
 	
 	print '\n' + str(len(relations)) + ' Non-Explicit relations created in total'
 	print str(nonMatchNum) + '/' + str(len(parses)) + ' documents have inconsistent sentence counts in parses.json and raw files'
 	
+	#sys.stderr.write( str(exceptNum) + ' adjacent sentences omitted while ' + str(len(relations)) + ' candidate adjacent sentences produced')
+	
 	#add explicit relations
 	for relation in predictions:
 		relations.append(relation)
 	print '\nExporting ' + str(len(relations)) + ' relations (both explicit and non-explicit) in total'
+	
 	return relations
 
 # Create a dictionary where the key is sentence index while the value is its line number in the raw file 
@@ -124,7 +133,13 @@ def createSentenceLineDict(DocID, docDir):
 		for line in f:
 			content = line.strip()
 			if lineCount > 0 and len(content) > 0:
-				sent_tokenize_list = sent_tokenize(content)
+				try:
+					sent_tokenize_list = sent_tokenize(content)
+				except:
+					result[senCount] = lineCount
+					senCount += 1
+					lineCount += 1
+					continue
 				for sen in sent_tokenize_list:
 					if len(sen) > 0:					
 						result[senCount] = lineCount
@@ -164,12 +179,13 @@ def extractArgFields(DocID, sen, senID, dictByDocID):
 	
 	tokenList=[]
 	for t in range(0, len(sen['words'])-1):
-# 		sentID=dictByTokenID[DocID][t]['sentID']
-# 		wordID=dictByTokenID[DocID][t]['wordID']
-		tokenID = dictByDocID[DocID][senID][t]['tokenID']
-		#character offset begin, character offset end, token offset within the document, sentence offset, token offset within the sentence
-		elementTokenList=[-1,-1,tokenID,senID,t]
-		tokenList.append(elementTokenList)
+		try:
+			tokenID = dictByDocID[DocID][senID][t]['tokenID']
+			#character offset begin, character offset end, token offset within the document, sentence offset, token offset within the sentence
+			elementTokenList=[-1,-1,tokenID,senID,t]
+			tokenList.append(elementTokenList)
+		except:
+			continue
 	arg['TokenList']=tokenList
 	return arg
 

@@ -421,7 +421,7 @@ def readInput(inputFilenamePath, inputParse, trainOrTest):
    #print(exc_type, fname, exc_tb.tb_lineno) 
    #sys.stderr.write( exc_tb.tb_lineno);
    #raise 
-   #countExcept = countExcept + 1;
+   countExcept = countExcept + 1;
    continue;
   if(trainOrTest == 'test'):
     arg1TokenList = [];
@@ -450,7 +450,7 @@ def readInput(inputFilenamePath, inputParse, trainOrTest):
  #print "Number of Explicit Relations: " + str(countOfExplicit);
  #num_folds = 10
  #cv = cross_validation.KFold(len(trainingSet), n_folds=10, indices=True, shuffle=False, random_state=None)
-
+ sys.stderr.write("Number Input: " + str(len(relations)) + ", Number Omitted: " + str(countExcept));
 def classifyText(train, test):
  #print "In function: classifyText";
  #print "Training: " + str(train[0]);

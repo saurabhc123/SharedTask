@@ -14,6 +14,7 @@ import copy
 import os.path
 import pickle as pkl
 import time
+import sys
 
 class argumentClassifier:
     arg1TrainingSet = [];
@@ -563,120 +564,128 @@ class argumentClassifier:
         arg1TokenList = [];
         arg2TokenList = [];
 
+        skippedCount = 0
+        exampleCount = 0
         for relation in relations:
-            connectiveType = relation['Type'];
-            arg1RelationsTokenList = relation['Arg1']['TokenList'];
-            arg2RelationsTokenList = relation['Arg2']['TokenList'];
-            if len(arg1RelationsTokenList) > 0:
-                arg1SentenceNumber = relation['Arg1']['TokenList'][0][3]
-            else:
-                arg1SentenceNumber = 200000
-            if len(arg2RelationsTokenList) > 0:
-                arg2SentenceNumber = relation['Arg2']['TokenList'][0][3];
-            else:
-                arg2SentenceNumber = 300000
-            relationDocId = relation['DocID'];
-            relationSense = relation['Sense'];
-            if 'RawText' in relation['Arg1']:
-                arg1RawText = relation['Arg1']['RawText']
-            else:
-                arg1RawText = ''
-
-            if 'RawText' in relation['Arg2']:
-                arg2RawText = relation['Arg2']['RawText']
-            else:
-                arg2RawText = ''
-
-            connective = relation['Connective']
-            id = relation['ID']
-            if connectiveType != 'Implicit':
-                arg1TokenList = list(
-                    map(lambda tokenList: self.generateTokenListForOutput(tokenList), relation['Arg1']['TokenList']));
-                arg2TokenList = list(
-                    map(lambda tokenList: self.generateTokenListForOutput(tokenList), relation['Arg2']['TokenList']));
-
-            if connectiveType == 'Implicit':
-
-
-                if arg1SentenceNumber == arg2SentenceNumber:
-                    f2 = 0;
-                    arg1TokenList = list(map(lambda tokenList: self.generateTokenListForOutput(tokenList),
-                                             relation['Arg1']['TokenList']));
-                    arg2TokenList = list(map(lambda tokenList: self.generateTokenListForOutput(tokenList),
-                                             relation['Arg2']['TokenList']));
-                elif arg2SentenceNumber - arg1SentenceNumber == 1:
-                    arg1Sentence = parsedData.documents[relationDocId][arg1SentenceNumber];
-                    arg2Sentence = parsedData.documents[relationDocId][arg2SentenceNumber];
-                    arg1TokenList = self.getPredictedTokenListForSentence(arg1Sentence, arg1Classifier, "Arg1");
-                    arg2TokenList = self.getPredictedTokenListForSentence(arg2Sentence, arg2Classifier, "Arg2");
-                    # arg1TokenList = list(map(lambda tokenList: self.generateTokenListForOutput(tokenList), relation['Arg1']['TokenList']));
-                    # arg2TokenList = list(map(lambda tokenList: self.generateTokenListForOutput(tokenList), relation['Arg2']['TokenList']));
-
-                    arg1WordList = map(
-                            lambda tokenIndex: arg1Sentence.words[tokenIndex - arg1Sentence.startTokenIndex].actualWord,
-                            arg1TokenList)
-                    arg2WordList = map(
-                                lambda tokenIndex: arg2Sentence.words[tokenIndex - arg2Sentence.startTokenIndex].actualWord,
-                                arg2TokenList)
-
-
-
-                    if len(arg1TokenList) == 0:
-                        arg1WordList = map(lambda word: word.actualWord, arg1Sentence.words)
-
-                    if len(arg2TokenList) == 0:
-                        arg2WordList = map(lambda word: word.actualWord, arg2Sentence.words)
-
-                    if arg1WordList:
-                        if (arg1WordList[len(arg1WordList) - 1]) in punctuation:
-                            arg1WordList.pop(-1);
-                            if len(arg1TokenList) != 0:
-                                arg1TokenList.pop(-1);
-
-                    if arg2WordList:
-                        if (arg2WordList[len(arg2WordList) - 1]) in punctuation:
-                            arg2WordList.pop(-1);
-                            if len(arg2TokenList) != 0:
-                                arg2TokenList.pop(-1);
-
-                    if len(arg1TokenList) == 0:
-                        for i in range(arg1Sentence.startTokenIndex , arg1Sentence.startTokenIndex + len(arg1WordList), 1):
-                            arg1TokenList.append(i);
-
-                    if len(arg2TokenList) == 0:
-                        for i in range(arg2Sentence.startTokenIndex , arg2Sentence.startTokenIndex + len(arg2WordList), 1):
-                            arg2TokenList.append(i);
+            try:
+                connectiveType = relation['Type'];
+                arg1RelationsTokenList = relation['Arg1']['TokenList'];
+                arg2RelationsTokenList = relation['Arg2']['TokenList'];
+                if len(arg1RelationsTokenList) > 0:
+                    arg1SentenceNumber = relation['Arg1']['TokenList'][0][3]
                 else:
-                    arg1TokenList = list(map(lambda tokenList: self.generateTokenListForOutput(tokenList),
-                                             relation['Arg1']['TokenList']));
-                    arg2TokenList = list(map(lambda tokenList: self.generateTokenListForOutput(tokenList),
-                                             relation['Arg2']['TokenList']));
+                    arg1SentenceNumber = 200000
+                if len(arg2RelationsTokenList) > 0:
+                    arg2SentenceNumber = relation['Arg2']['TokenList'][0][3];
+                else:
+                    arg2SentenceNumber = 300000
+                relationDocId = relation['DocID'];
+                relationSense = relation['Sense'];
+                if 'RawText' in relation['Arg1']:
+                    arg1RawText = relation['Arg1']['RawText']
+                else:
+                    arg1RawText = ''
 
-                arg1RelationsTokenList = []
-                arg2RelationsTokenList = []
+                if 'RawText' in relation['Arg2']:
+                    arg2RawText = relation['Arg2']['RawText']
+                else:
+                    arg2RawText = ''
 
-                for argToken in arg1TokenList:
-                    if argToken - arg1Sentence.startTokenIndex < 0:
-                        print "Non subsequent implicit sentences found -> Arg1"
-                        continue
-                    arg1RelationsTokenList.append([0, 0, argToken, arg1SentenceNumber, argToken - arg1Sentence.startTokenIndex]);
-                for argToken in arg2TokenList:
-                    if argToken - arg2Sentence.startTokenIndex < 0:
-                        print "Non subsequent implicit sentences found -> Arg2"
-                        print "Difference = ", arg2SentenceNumber - arg1SentenceNumber
-                        continue
-                    arg2RelationsTokenList.append([0, 0, argToken, arg2SentenceNumber, argToken - arg2Sentence.startTokenIndex]);
+                connective = relation['Connective']
+                id = relation['ID']
+                if connectiveType != 'Implicit':
+                    arg1TokenList = list(
+                        map(lambda tokenList: self.generateTokenListForOutput(tokenList), relation['Arg1']['TokenList']));
+                    arg2TokenList = list(
+                        map(lambda tokenList: self.generateTokenListForOutput(tokenList), relation['Arg2']['TokenList']));
 
-                arg1RawText = "".join([('' if word in punctuation else ' ')+word for word in arg1WordList])
-                arg2RawText = "".join([('' if word in punctuation else ' ')+word for word in arg2WordList])
+                if connectiveType == 'Implicit':
 
-            with open(outputFilename, 'a+') as f:
-                output = outputRecord.OutputRecord.loadFromParameters(relationDocId, relationSense, connectiveType,
-                                                                      connective, arg1RelationsTokenList,
-                                                                      arg2RelationsTokenList, id);
-                formattedOutput = output.getFormattedOutputForRelations(arg1RawText,arg2RawText);
-                json.dump(formattedOutput, f, sort_keys=True);
-                f.write("\n");
+		    exampleCount = exampleCount + 1
+                    if arg1SentenceNumber == arg2SentenceNumber:
+                        f2 = 0;
+                        arg1TokenList = list(map(lambda tokenList: self.generateTokenListForOutput(tokenList),
+                                                 relation['Arg1']['TokenList']));
+                        arg2TokenList = list(map(lambda tokenList: self.generateTokenListForOutput(tokenList),
+                                                 relation['Arg2']['TokenList']));
+                    elif arg2SentenceNumber - arg1SentenceNumber == 1:
+                        arg1Sentence = parsedData.documents[relationDocId][arg1SentenceNumber];
+                        arg2Sentence = parsedData.documents[relationDocId][arg2SentenceNumber];
+                        arg1TokenList = self.getPredictedTokenListForSentence(arg1Sentence, arg1Classifier, "Arg1");
+                        arg2TokenList = self.getPredictedTokenListForSentence(arg2Sentence, arg2Classifier, "Arg2");
+                        # arg1TokenList = list(map(lambda tokenList: self.generateTokenListForOutput(tokenList), relation['Arg1']['TokenList']));
+                        # arg2TokenList = list(map(lambda tokenList: self.generateTokenListForOutput(tokenList), relation['Arg2']['TokenList']));
+
+                        arg1WordList = map(
+                                lambda tokenIndex: arg1Sentence.words[tokenIndex - arg1Sentence.startTokenIndex].actualWord,
+                                arg1TokenList)
+                        arg2WordList = map(
+                                    lambda tokenIndex: arg2Sentence.words[tokenIndex - arg2Sentence.startTokenIndex].actualWord,
+                                    arg2TokenList)
+
+
+
+                        if len(arg1TokenList) == 0:
+                            arg1WordList = map(lambda word: word.actualWord, arg1Sentence.words)
+
+                        if len(arg2TokenList) == 0:
+                            arg2WordList = map(lambda word: word.actualWord, arg2Sentence.words)
+
+                        if arg1WordList:
+                            if (arg1WordList[len(arg1WordList) - 1]) in punctuation:
+                                arg1WordList.pop(-1);
+                                if len(arg1TokenList) != 0:
+                                    arg1TokenList.pop(-1);
+
+                        if arg2WordList:
+                            if (arg2WordList[len(arg2WordList) - 1]) in punctuation:
+                                arg2WordList.pop(-1);
+                                if len(arg2TokenList) != 0:
+                                    arg2TokenList.pop(-1);
+
+                        if len(arg1TokenList) == 0:
+                            for i in range(arg1Sentence.startTokenIndex , arg1Sentence.startTokenIndex + len(arg1WordList), 1):
+                                arg1TokenList.append(i);
+
+                        if len(arg2TokenList) == 0:
+                            for i in range(arg2Sentence.startTokenIndex , arg2Sentence.startTokenIndex + len(arg2WordList), 1):
+                                arg2TokenList.append(i);
+                    else:
+                        arg1TokenList = list(map(lambda tokenList: self.generateTokenListForOutput(tokenList),
+                                                 relation['Arg1']['TokenList']));
+                        arg2TokenList = list(map(lambda tokenList: self.generateTokenListForOutput(tokenList),
+                                                 relation['Arg2']['TokenList']));
+
+                    arg1RelationsTokenList = []
+                    arg2RelationsTokenList = []
+
+                    for argToken in arg1TokenList:
+                        if argToken - arg1Sentence.startTokenIndex < 0:
+                            print "Non subsequent implicit sentences found -> Arg1"
+                            continue
+                        arg1RelationsTokenList.append([0, 0, argToken, arg1SentenceNumber, argToken - arg1Sentence.startTokenIndex]);
+                    for argToken in arg2TokenList:
+                        if argToken - arg2Sentence.startTokenIndex < 0:
+                            print "Non subsequent implicit sentences found -> Arg2"
+                            print "Difference = ", arg2SentenceNumber - arg1SentenceNumber
+                            continue
+                        arg2RelationsTokenList.append([0, 0, argToken, arg2SentenceNumber, argToken - arg2Sentence.startTokenIndex]);
+
+                    arg1RawText = "".join([('' if word in punctuation else ' ')+word for word in arg1WordList])
+                    arg2RawText = "".join([('' if word in punctuation else ' ')+word for word in arg2WordList])
+
+                with open(outputFilename, 'a+') as f:
+                    output = outputRecord.OutputRecord.loadFromParameters(relationDocId, relationSense, connectiveType,
+                                                                          connective, arg1RelationsTokenList,
+                                                                          arg2RelationsTokenList, id);
+                    formattedOutput = output.getFormattedOutputForRelations(arg1RawText,arg2RawText);
+                    json.dump(formattedOutput, f, sort_keys=True);
+                    f.write("\n");
+            except:
+                skippedCount = skippedCount + 1
+                continue
+
+        sys.stderr.write( "Total predicted count(Impl) = " + str(exampleCount) + "Skipped = " + str(skippedCount))
 
     def performClassificationOnTestOld(self, arg1Classifier, arg2Classifier, outputFilename):
         correctArg1Predictions = 0;
@@ -808,3 +817,4 @@ def extract_implicit_arguments(input_relations_file, input_parses_file, output_r
     trainedArg2Model = argumentClassifierInstance.get_arg2_model()
     print "Making predictions now for implicit arguments..." + (time.strftime("%I:%M:%S"))
     argumentClassifierInstance.performClassificationOnTest(trainedArg1Model, trainedArg2Model, output_relations_file)
+

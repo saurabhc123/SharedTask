@@ -357,8 +357,7 @@ def readInput(relationFilePath, parseFilePath, trainOrTest):
     pdtb_file = codecs.open(relationFilePath, encoding='utf8');
     relations = [json.loads(x) for x in pdtb_file];
     print("Done");
-    sys.stderr.write("Number of Input Relations: " + str(len(relations))); 
-    sys.exit();
+    
     #Read parses.json
     print ("Reading parses.json");
     parse_file = codecs.open(parseFilePath, encoding='utf8')
@@ -372,211 +371,215 @@ def readInput(relationFilePath, parseFilePath, trainOrTest):
     for relation in relations:
         cType = relation['Type']; 
         if cType == 'Explicit':
-#             instanceID = ''
-            countOfExplicit = countOfExplicit + 1;
-            
-            #Get the labels
-            if len(relation['Sense']) > 1:
-                print "\nRelation Number " + str(counter) + " has multiple senses:"
-                for sense in relation['Sense']:
-                    print "---[" + sense + "]"
-            label = relation['Sense'][0]
-            
-            #Ignore relations with invalid senses
-#             if not label in validator.EN_SENSES:
-#                 continue
-            
-            if trainOrTest == 'test':
-                goldList.append(relation) 
-            
-            #print "Extracting features from Relation [" + str(counter) + "]..."
-            #print "Relation Number " + str(counter) + " has explicit connective with connective word being : '" + relation['Connective']['RawText'] + "'";
-            relation_DocID = relation['DocID'];
-            parseJSON_sentence_number_arg2 = relation['Arg2']['TokenList'][0][3];
-            connectiveWordIDs = []
-            #Check whether multiple-token connective or not
-            if (len(relation['Connective']['TokenList']) > 1):
-                multiWordConn += 1
-            for i in range(len(relation['Connective']['TokenList'])):
-                connectiveWordIDs.append(relation['Connective']['TokenList'][i][4]);
-
-            #Skip the instances with in-consecutive multiple-token connective words
-#             if len(connectiveWordIDs) > 1:
-#                 if connectiveWordIDs[-1] - connectiveWordIDs[0] > len(connectiveWordIDs) - 1:
-#                     continue
-            
-            #Parses.json object for that relation
-            parseObjectArg2 = en_parse_dict[relation_DocID]['sentences'][parseJSON_sentence_number_arg2];
-            connectiveWords = []
-            for i in range(len(connectiveWordIDs)):
-                connectiveWords.append(parseObjectArg2['words'][connectiveWordIDs[i]][0]);
-
-            #Building Feature Set
-            features = dict();
-            
-            #Feature 1: Connective Token 1
-            token1 = connectiveWords[0]
-            features['f01'] = token1
-            
-            #Feature 2: Connective Token 2
-            token2 = ''
-            if len(connectiveWords) >= 2:
-                token2 = connectiveWords[1]
-                features['f02'] = token2
-            
-            #Feature 3: Connective String (C)
-            strConnectiveWords = '_'.join(connectiveWords);
-            features['f03'] = strConnectiveWords; 
-            
-            #Feature 4: Previous Word
-            prev_1 = str(parseObjectArg2['words'][connectiveWordIDs[0] - 1][0]);
-            features['f04'] = prev_1
-            
-            #Feature 5: Next Word
-            nextWordID = connectiveWordIDs[-1] + 1
-            if nextWordID < len(parseObjectArg2['words']):
-                next_1 = str(parseObjectArg2['words'][nextWordID][0]);
-            else:
-                next_1 = ''
-            features['f05'] = next_1
-            
-            #Feature 6: prev_1 + C
-            prev_1_plus_C = prev_1 + "+" + strConnectiveWords;
-            features['f06'] = prev_1_plus_C;
-             
-            #Feature 7: C + Next Word
-            c_next = strConnectiveWords + '+' + next_1
-            features['f07'] = c_next
-             
-            #Feature 8: Prev Word + Next Word
-            prev_next = prev_1 + '+' + next_1
-            features['f08'] = prev_next
-             
-            #Feature 9: Prev Word + C + Next Word
-            prev_c_next = prev_1 + '+' + strConnectiveWords + '+' + next_1
-            features['f09'] = prev_c_next
-             
-            #Feature 10: POS of Connective
-            connectivePOSs = []
-            for i in range(len(connectiveWordIDs)):
-                connectivePOSs.append(str(parseObjectArg2['words'][connectiveWordIDs[i]][1]['PartOfSpeech']));
-            features['f10'] = '_'.join(connectivePOSs);
-             
-            #Feature 11: self_category
-            pt = parseObjectArg2['parsetree'];
-            ptree = ParentedTree.fromstring(pt);
-            selfCategory = self_category(connectiveWordIDs, connectiveWords, ptree)
-            if len(selfCategory) > 0:
-                features['f11'] = selfCategory
-               
-            #Feature 12: parent_category
-            parentCategory = parent_category(connectiveWordIDs, connectiveWords, ptree)
-            if len(parentCategory) > 0:
-                features['f12'] = parentCategory
+            try:
+    #             instanceID = ''
+                countOfExplicit = countOfExplicit + 1;
                 
-            #Feature 13: left_sibling
-            leftSibling = left_sibling(connectiveWordIDs, connectiveWords, ptree)
-            if len(leftSibling) > 0:
-                features['f13'] = leftSibling
+                #Get the labels
+                if len(relation['Sense']) > 1:
+                    print "\nRelation Number " + str(counter) + " has multiple senses:"
+                    for sense in relation['Sense']:
+                        print "---[" + sense + "]"
+                label = relation['Sense'][0]
                 
-            #Feature 14: right_sibling
-            rightSibling = right_sibling(connectiveWordIDs, connectiveWords, ptree)
-            if len(rightSibling) > 0:
-                features['f14'] = rightSibling
-              
-            #Feature 15: C String + Self Category
-            c_selfCategory = strConnectiveWords + "+" + selfCategory
-            if len(selfCategory) > 0:
-                features['f15'] = c_selfCategory
-              
-            #Feature 16: C String + Parent Category
-            c_parentCategory = strConnectiveWords + "+" + parentCategory
-            if len(parentCategory) > 0:
-                features['f16'] = c_parentCategory
-              
-            #Feature 17: C String + Left Sibling
-            c_leftSibling = strConnectiveWords + "+" + leftSibling
-            if len(leftSibling) > 0:
-                features['f17'] = c_leftSibling
-              
-            #Feature 18: C String + Right Sibling
-            c_rightSibling = strConnectiveWords + "+" + rightSibling
-            if len(rightSibling) > 0:
-                features['f18'] = c_rightSibling
-              
-            #Feature 19: Self Category + Parent Category
-            selfCategory_parentCategory = selfCategory + "+" + parentCategory
-            if len(selfCategory) > 0:
-                features['f19'] = selfCategory_parentCategory
-              
-            #Feature 20: Self Category + Left Sibling
-            selfCategory_leftSibling = selfCategory + "+" + leftSibling
-            if len(selfCategory) > 0:
-                features['f20'] = selfCategory_leftSibling
-              
-            #Feature 21: Self Category + Right Sibling
-            selfCategory_rightSibling = selfCategory + "+" + rightSibling
-            if len(selfCategory) > 0:
-                features['f21'] = selfCategory_rightSibling
-              
-            #Feature 22: Parent Category + Left Sibling
-            parentCategory_leftSibling = parentCategory + "+" + leftSibling
-            if len(parentCategory) > 0:
-                features['f22'] = parentCategory_leftSibling
-              
-            #Feature 23: Parent Category + Right Sibling
-            parentCategory_rightSibling = parentCategory + "+" + rightSibling
-            if len(parentCategory) > 0:
-                features['f23'] = parentCategory_rightSibling
-              
-            #Feature 24: Left Sibling + Right Sibling
-            leftSibling_rightSibling = leftSibling + "+" + rightSibling
-            if len(leftSibling) > 0 and len(rightSibling) > 0 :
-                features['f24'] = leftSibling_rightSibling
-              
-            #Feature 25: parent_category linked context
-            parentCategoryLinkedContext = parent_category_linked_context(connectiveWordIDs, connectiveWords, ptree)
-            if len(parentCategoryLinkedContext) > 0:
-                features['f25'] = parentCategoryLinkedContext
-               
-            #Feature 26: previous connective words of current connective word 'as'
-            #Feature 27: previous connective POSs of current connective word 'as'
-            preConnStrings = ''
-            preConnPOSs = ''
-            if strConnectiveWords.lower() == 'as':
-                if(trainOrTest == 'train'):
-                    dataset = trainingSet
+                #Ignore relations with invalid senses
+    #             if not label in validator.EN_SENSES:
+    #                 continue
+                
+                #print "Extracting features from Relation [" + str(counter) + "]..."
+                #print "Relation Number " + str(counter) + " has explicit connective with connective word being : '" + relation['Connective']['RawText'] + "'";
+                relation_DocID = relation['DocID'];
+                parseJSON_sentence_number_arg2 = relation['Arg2']['TokenList'][0][3];
+                connectiveWordIDs = []
+                #Check whether multiple-token connective or not
+                if (len(relation['Connective']['TokenList']) > 1):
+                    multiWordConn += 1
+                for i in range(len(relation['Connective']['TokenList'])):
+                    connectiveWordIDs.append(relation['Connective']['TokenList'][i][4]);
+    
+                #Skip the instances with in-consecutive multiple-token connective words
+    #             if len(connectiveWordIDs) > 1:
+    #                 if connectiveWordIDs[-1] - connectiveWordIDs[0] > len(connectiveWordIDs) - 1:
+    #                     continue
+                
+                #Parses.json object for that relation
+                parseObjectArg2 = en_parse_dict[relation_DocID]['sentences'][parseJSON_sentence_number_arg2];
+                connectiveWords = []
+                for i in range(len(connectiveWordIDs)):
+                    connectiveWords.append(parseObjectArg2['words'][connectiveWordIDs[i]][0]);
+    
+                #Building Feature Set
+                features = dict();
+                
+                #Feature 1: Connective Token 1
+                token1 = connectiveWords[0]
+                features['f01'] = token1
+                
+                #Feature 2: Connective Token 2
+                token2 = ''
+                if len(connectiveWords) >= 2:
+                    token2 = connectiveWords[1]
+                    features['f02'] = token2
+                
+                #Feature 3: Connective String (C)
+                strConnectiveWords = '_'.join(connectiveWords);
+                features['f03'] = strConnectiveWords; 
+                
+                #Feature 4: Previous Word
+                prev_1 = str(parseObjectArg2['words'][connectiveWordIDs[0] - 1][0]);
+                features['f04'] = prev_1
+                
+                #Feature 5: Next Word
+                nextWordID = connectiveWordIDs[-1] + 1
+                if nextWordID < len(parseObjectArg2['words']):
+                    next_1 = str(parseObjectArg2['words'][nextWordID][0]);
                 else:
-                    dataset = testSet
-                preConnStrings = previous_conn_string(dataset)
-                preConnPOSs = previous_conn_pos(dataset)
-            if len(preConnStrings) > 0:
-                features['f26'] = preConnStrings
-            if len(preConnPOSs) > 0:
-                features['f27'] = preConnPOSs
-              
-            #Feature 28: previous connective words of current connective word 'when'
-            #Feature 29: previous connective POSs of current connective word 'when'
-            preConnStrings = ''
-            preConnPOSs = ''
-            if strConnectiveWords.lower() == 'when':
+                    next_1 = ''
+                features['f05'] = next_1
+                
+                #Feature 6: prev_1 + C
+                prev_1_plus_C = prev_1 + "+" + strConnectiveWords;
+                features['f06'] = prev_1_plus_C;
+                 
+                #Feature 7: C + Next Word
+                c_next = strConnectiveWords + '+' + next_1
+                features['f07'] = c_next
+                 
+                #Feature 8: Prev Word + Next Word
+                prev_next = prev_1 + '+' + next_1
+                features['f08'] = prev_next
+                 
+                #Feature 9: Prev Word + C + Next Word
+                prev_c_next = prev_1 + '+' + strConnectiveWords + '+' + next_1
+                features['f09'] = prev_c_next
+                 
+                #Feature 10: POS of Connective
+                connectivePOSs = []
+                for i in range(len(connectiveWordIDs)):
+                    connectivePOSs.append(str(parseObjectArg2['words'][connectiveWordIDs[i]][1]['PartOfSpeech']));
+                features['f10'] = '_'.join(connectivePOSs);
+                 
+                #Feature 11: self_category
+                pt = parseObjectArg2['parsetree'];
+                ptree = ParentedTree.fromstring(pt);
+                selfCategory = self_category(connectiveWordIDs, connectiveWords, ptree)
+                if len(selfCategory) > 0:
+                    features['f11'] = selfCategory
+                   
+                #Feature 12: parent_category
+                parentCategory = parent_category(connectiveWordIDs, connectiveWords, ptree)
+                if len(parentCategory) > 0:
+                    features['f12'] = parentCategory
+                    
+                #Feature 13: left_sibling
+                leftSibling = left_sibling(connectiveWordIDs, connectiveWords, ptree)
+                if len(leftSibling) > 0:
+                    features['f13'] = leftSibling
+                    
+                #Feature 14: right_sibling
+                rightSibling = right_sibling(connectiveWordIDs, connectiveWords, ptree)
+                if len(rightSibling) > 0:
+                    features['f14'] = rightSibling
+                  
+                #Feature 15: C String + Self Category
+                c_selfCategory = strConnectiveWords + "+" + selfCategory
+                if len(selfCategory) > 0:
+                    features['f15'] = c_selfCategory
+                  
+                #Feature 16: C String + Parent Category
+                c_parentCategory = strConnectiveWords + "+" + parentCategory
+                if len(parentCategory) > 0:
+                    features['f16'] = c_parentCategory
+                  
+                #Feature 17: C String + Left Sibling
+                c_leftSibling = strConnectiveWords + "+" + leftSibling
+                if len(leftSibling) > 0:
+                    features['f17'] = c_leftSibling
+                  
+                #Feature 18: C String + Right Sibling
+                c_rightSibling = strConnectiveWords + "+" + rightSibling
+                if len(rightSibling) > 0:
+                    features['f18'] = c_rightSibling
+                  
+                #Feature 19: Self Category + Parent Category
+                selfCategory_parentCategory = selfCategory + "+" + parentCategory
+                if len(selfCategory) > 0:
+                    features['f19'] = selfCategory_parentCategory
+                  
+                #Feature 20: Self Category + Left Sibling
+                selfCategory_leftSibling = selfCategory + "+" + leftSibling
+                if len(selfCategory) > 0:
+                    features['f20'] = selfCategory_leftSibling
+                  
+                #Feature 21: Self Category + Right Sibling
+                selfCategory_rightSibling = selfCategory + "+" + rightSibling
+                if len(selfCategory) > 0:
+                    features['f21'] = selfCategory_rightSibling
+                  
+                #Feature 22: Parent Category + Left Sibling
+                parentCategory_leftSibling = parentCategory + "+" + leftSibling
+                if len(parentCategory) > 0:
+                    features['f22'] = parentCategory_leftSibling
+                  
+                #Feature 23: Parent Category + Right Sibling
+                parentCategory_rightSibling = parentCategory + "+" + rightSibling
+                if len(parentCategory) > 0:
+                    features['f23'] = parentCategory_rightSibling
+                  
+                #Feature 24: Left Sibling + Right Sibling
+                leftSibling_rightSibling = leftSibling + "+" + rightSibling
+                if len(leftSibling) > 0 and len(rightSibling) > 0 :
+                    features['f24'] = leftSibling_rightSibling
+                  
+                #Feature 25: parent_category linked context
+                parentCategoryLinkedContext = parent_category_linked_context(connectiveWordIDs, connectiveWords, ptree)
+                if len(parentCategoryLinkedContext) > 0:
+                    features['f25'] = parentCategoryLinkedContext
+                   
+                #Feature 26: previous connective words of current connective word 'as'
+                #Feature 27: previous connective POSs of current connective word 'as'
+                preConnStrings = ''
+                preConnPOSs = ''
+                if strConnectiveWords.lower() == 'as':
+                    if(trainOrTest == 'train'):
+                        dataset = trainingSet
+                    else:
+                        dataset = testSet
+                    preConnStrings = previous_conn_string(dataset)
+                    preConnPOSs = previous_conn_pos(dataset)
+                if len(preConnStrings) > 0:
+                    features['f26'] = preConnStrings
+                if len(preConnPOSs) > 0:
+                    features['f27'] = preConnPOSs
+                  
+                #Feature 28: previous connective words of current connective word 'when'
+                #Feature 29: previous connective POSs of current connective word 'when'
+                preConnStrings = ''
+                preConnPOSs = ''
+                if strConnectiveWords.lower() == 'when':
+                    if(trainOrTest == 'train'):
+                        dataset = trainingSet
+                    else:
+                        dataset = testSet
+                    preConnStrings = previous_conn_string(dataset)
+                    preConnPOSs = previous_conn_pos(dataset)
+                if len(preConnStrings) > 0:
+                    features['f28'] = preConnStrings
+                if len(preConnPOSs) > 0:
+                    features['f29'] = preConnPOSs
+                
+    #             instanceID = 'DocID-' + str(relation_DocID) + ':SentID-' + str(parseJSON_sentence_number_arg2) + ':RelID-' + str(counter)
+                
                 if(trainOrTest == 'train'):
-                    dataset = trainingSet
+                    trainingSet.append((features, label));
                 else:
-                    dataset = testSet
-                preConnStrings = previous_conn_string(dataset)
-                preConnPOSs = previous_conn_pos(dataset)
-            if len(preConnStrings) > 0:
-                features['f28'] = preConnStrings
-            if len(preConnPOSs) > 0:
-                features['f29'] = preConnPOSs
+                    testSet.append((features, label)); 
+                
+                if trainOrTest == 'test':
+                    goldList.append(relation)
             
-#             instanceID = 'DocID-' + str(relation_DocID) + ':SentID-' + str(parseJSON_sentence_number_arg2) + ':RelID-' + str(counter)
-            
-            if(trainOrTest == 'train'):
-                trainingSet.append((features, label));
-            else:
-                testSet.append((features, label)); 
+            except:
+                continue
             
         counter = counter + 1;
         
