@@ -5,7 +5,7 @@ from feature import Feature
 from example import Example
 from random import shuffle
 import json
-from tools.PorterStemmer import PorterStemmer
+#from tools.PorterStemmer import PorterStemmer
 import re
 from nltk.stem.wordnet import WordNetLemmatizer
 from nltk.corpus import wordnet
